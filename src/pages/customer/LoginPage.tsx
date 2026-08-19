@@ -1,0 +1,164 @@
+import React, { useState } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { BookOpen, LogIn, Lock, Mail, Sparkles } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../contexts/ToastContext';
+import { Button } from '../../components/common/Button';
+import { Input } from '../../components/common/Input';
+
+export const LoginPage: React.FC = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const { login } = useAuth();
+  const { showToast } = useToast();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const from = (location.state as any)?.from?.pathname || '/';
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setIsLoading(true);
+
+    try {
+      await login(email, password);
+      showToast('Logged in successfully! Welcome back.', 'success');
+      navigate(from, { replace: true });
+    } catch (err: any) {
+      setError(err.message || 'Login failed. Please check your credentials.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDemoFill = () => {
+    setEmail('customer@recipebooks.com');
+    setPassword('customer123');
+  };
+
+  return (
+    <div style={{ padding: '3.5rem 1.25rem', minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div
+        className="surface-card animate-pop-in"
+        style={{
+          width: '100%',
+          maxWidth: '440px',
+          padding: '2.5rem',
+          backgroundColor: 'var(--bg-surface)',
+        }}
+      >
+        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+          <div
+            style={{
+              width: '52px',
+              height: '52px',
+              borderRadius: 'var(--radius-md)',
+              background: 'linear-gradient(135deg, var(--primary) 0%, #C22500 100%)',
+              color: '#FFFFFF',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 1rem',
+              boxShadow: 'var(--shadow-primary)',
+            }}
+          >
+            <BookOpen size={28} />
+          </div>
+          <h2 style={{ fontSize: '1.75rem', marginBottom: '0.375rem' }}>Welcome Back</h2>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.9375rem' }}>
+            Sign in to access your purchased recipe books and library.
+          </p>
+        </div>
+
+        {/* Demo Account Quick Fill Pill */}
+        <div
+          onClick={handleDemoFill}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '0.625rem 0.875rem',
+            backgroundColor: 'var(--primary-light)',
+            border: '1px dashed var(--primary-border)',
+            borderRadius: 'var(--radius-md)',
+            marginBottom: '1.5rem',
+            cursor: 'pointer',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8125rem', color: 'var(--primary-dark)', fontWeight: 600 }}>
+            <Sparkles size={16} />
+            <span>Click to autofill Customer Demo</span>
+          </div>
+          <span style={{ fontSize: '0.75rem', color: 'var(--primary)', textDecoration: 'underline' }}>Auto-Fill</span>
+        </div>
+
+        {error && (
+          <div
+            style={{
+              backgroundColor: '#FFF5F5',
+              border: '1px solid #FFC9C9',
+              borderRadius: 'var(--radius-md)',
+              padding: '0.75rem 1rem',
+              color: 'var(--accent-berry)',
+              fontSize: '0.875rem',
+              marginBottom: '1.25rem',
+            }}
+          >
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <Input
+            label="Email Address"
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@example.com"
+            leftIcon={<Mail size={18} />}
+          />
+
+          <div>
+            <Input
+              label="Password"
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              leftIcon={<Lock size={18} />}
+            />
+            <div style={{ textAlign: 'right', marginTop: '-0.5rem', marginBottom: '0.75rem' }}>
+              <Link to="/forgot-password" style={{ fontSize: '0.8125rem', color: 'var(--primary)', fontWeight: 600 }}>
+                Forgot Password?
+              </Link>
+            </div>
+          </div>
+
+          <Button
+            type="submit"
+            variant="primary"
+            size="lg"
+            fullWidth
+            isLoading={isLoading}
+            leftIcon={<LogIn size={18} />}
+          >
+            Log In
+          </Button>
+        </form>
+
+        <div style={{ textAlign: 'center', marginTop: '1.75rem', paddingTop: '1.25rem', borderTop: '1px solid var(--border-light)', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+          Don't have an account?{' '}
+          <Link to="/register" style={{ color: 'var(--primary)', fontWeight: 700 }}>
+            Register for free
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+};

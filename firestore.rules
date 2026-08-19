@@ -1,0 +1,71 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && (
+        (request.auth.token.role == 'admin') ||
+        (getUserData().role == 'admin')
+      );
+    }
+
+    // Users Collection
+    match /users/{userId} {
+      // Anyone authenticated can read their own profile; admins can read all profiles
+      allow read: if isOwner(userId) || isAdmin();
+      // User can create their initial profile during signup
+      allow create: if isAuthenticated() && (
+        request.resource.data.role == 'customer' || isAdmin()
+      );
+      // User can update their name/profile, but CANNOT modify their own role unless they are already admin
+      allow update: if isOwner(userId) && (
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role']) || isAdmin()
+      );
+      allow delete: if isAdmin();
+    }
+
+    // Books Collection
+    match /books/{bookId} {
+      // Public can read published books; Admins can read all books
+      allow read: if (resource.data.isPublished == true) || isAdmin();
+      // Only admins can create, update, or delete books
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Orders Collection
+    match /orders/{orderId} {
+      // Users can only read their own orders; Admins can read all orders
+      allow read: if (isAuthenticated() && resource.data.userId == request.auth.uid) || isAdmin();
+      // Users can create orders for themselves with valid parameters
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      // Only admins can update or delete orders
+      allow update, delete: if isAdmin();
+    }
+
+    // Libraries Collection (Purchased Books)
+    match /libraries/{libraryId} {
+      // Customers can only read and update their own purchased library items (e.g. download count)
+      allow read: if (isAuthenticated() && resource.data.userId == request.auth.uid) || isAdmin();
+      allow create: if isAuthenticated() && (
+        request.resource.data.userId == request.auth.uid || isAdmin()
+      );
+      allow update: if isAuthenticated() && resource.data.userId == request.auth.uid && (
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['downloadCount', 'lastDownloadedAt'])
+      );
+      allow delete: if isAdmin();
+    }
+  }
+}
