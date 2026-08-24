@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { ShieldCheck, LogIn, Lock, Mail, Sparkles, Store } from 'lucide-react';
+import { ShieldCheck, LogIn, Lock, Mail, Store } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import { Button } from '../../components/common/Button';
@@ -38,11 +38,6 @@ export const AdminLoginPage: React.FC = () => {
     }
   };
 
-  const handleDemoFill = () => {
-    setEmail('admin@recipebooks.com');
-    setPassword('admin123');
-  };
-
   return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#1C1917', padding: '2rem 1.25rem' }}>
       <div
@@ -78,28 +73,6 @@ export const AdminLoginPage: React.FC = () => {
           </p>
         </div>
 
-        {/* Demo Admin Auto Fill */}
-        <div
-          onClick={handleDemoFill}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '0.625rem 0.875rem',
-            backgroundColor: 'var(--primary-light)',
-            border: '1px dashed var(--primary-border)',
-            borderRadius: 'var(--radius-md)',
-            marginBottom: '1.5rem',
-            cursor: 'pointer',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8125rem', color: 'var(--primary-dark)', fontWeight: 600 }}>
-            <Sparkles size={16} />
-            <span>Click to autofill Demo Admin</span>
-          </div>
-          <span style={{ fontSize: '0.75rem', color: 'var(--primary)', textDecoration: 'underline' }}>Auto-Fill</span>
-        </div>
-
         {error && (
           <div
             style={{
@@ -123,7 +96,7 @@ export const AdminLoginPage: React.FC = () => {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="admin@recipebooks.com"
+            placeholder="you@example.com"
             leftIcon={<Mail size={18} />}
           />
 

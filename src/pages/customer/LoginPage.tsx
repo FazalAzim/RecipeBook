@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { BookOpen, LogIn, Lock, Mail, Sparkles } from 'lucide-react';
+import { BookOpen, LogIn, Lock, Mail, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import { Button } from '../../components/common/Button';
@@ -35,11 +35,6 @@ export const LoginPage: React.FC = () => {
     }
   };
 
-  const handleDemoFill = () => {
-    setEmail('customer@recipebooks.com');
-    setPassword('customer123');
-  };
-
   return (
     <div style={{ padding: '1.5rem 1rem', minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="auth-page">
       <div
@@ -72,30 +67,6 @@ export const LoginPage: React.FC = () => {
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.9375rem' }}>
             Sign in to access your purchased recipe books and library.
           </p>
-        </div>
-
-        {/* Demo Account Quick Fill Pill */}
-        <div
-          onClick={handleDemoFill}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '0.5rem',
-            padding: '0.625rem 0.875rem',
-            backgroundColor: 'var(--primary-light)',
-            border: '1px dashed var(--primary-border)',
-            borderRadius: 'var(--radius-md)',
-            marginBottom: '1.5rem',
-            cursor: 'pointer',
-            flexWrap: 'wrap',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8125rem', color: 'var(--primary-dark)', fontWeight: 600 }}>
-            <Sparkles size={16} />
-            <span>Click to autofill Customer Demo</span>
-          </div>
-          <span style={{ fontSize: '0.75rem', color: 'var(--primary)', textDecoration: 'underline' }}>Auto-Fill</span>
         </div>
 
         {error && (
@@ -158,6 +129,23 @@ export const LoginPage: React.FC = () => {
           Don't have an account?{' '}
           <Link to="/register" style={{ color: 'var(--primary)', fontWeight: 700 }}>
             Register for free
+          </Link>
+        </div>
+
+        <div style={{ textAlign: 'center', marginTop: '1rem' }}>
+          <Link
+            to="/admin/login"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.375rem',
+              fontSize: '0.8125rem',
+              fontWeight: 600,
+              color: 'var(--text-muted)',
+            }}
+          >
+            <ShieldCheck size={14} />
+            Admin Login
           </Link>
         </div>
       </div>
