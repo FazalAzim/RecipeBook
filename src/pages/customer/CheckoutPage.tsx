@@ -111,7 +111,7 @@ export const CheckoutPage: React.FC = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
             {/* Account / Contact Card */}
             <div className="surface-card" style={{ padding: '1.75rem', backgroundColor: 'var(--bg-surface)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
+              <div className="checkout-customer-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
                 <h3 style={{ fontSize: '1.1875rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <UserCheck size={20} color="var(--primary)" />
                   <span>Customer Information</span>
@@ -122,7 +122,7 @@ export const CheckoutPage: React.FC = () => {
                   <button
                     onClick={() => setShowAuthForm(prev => !prev)}
                     className="btn btn-ghost btn-sm"
-                    style={{ color: 'var(--primary)', fontWeight: 600 }}
+                    style={{ color: 'var(--primary)', fontWeight: 600, whiteSpace: 'normal', textAlign: 'right' }}
                   >
                     {showAuthForm ? 'Close Login' : 'Already have an account? Log In'}
                   </button>
@@ -149,7 +149,7 @@ export const CheckoutPage: React.FC = () => {
                       {authError}
                     </div>
                   )}
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '0.75rem' }}>
+                  <div className="checkout-login-fields" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '0.75rem' }}>
                     <Input
                       label="Email Address"
                       type="email"
@@ -174,7 +174,7 @@ export const CheckoutPage: React.FC = () => {
               )}
 
               {user ? (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', backgroundColor: 'var(--bg-subtle)', padding: '1rem', borderRadius: 'var(--radius-md)' }}>
+                <div className="checkout-user-fields" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', backgroundColor: 'var(--bg-subtle)', padding: '1rem', borderRadius: 'var(--radius-md)' }}>
                   <div>
                     <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Name</div>
                     <div style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{user.name}</div>
@@ -329,6 +329,13 @@ export const CheckoutPage: React.FC = () => {
       <style>{`
         @media (max-width: 860px) {
           .checkout-layout-grid {
+            grid-template-columns: 1fr !important;
+            gap: 1.5rem !important;
+          }
+        }
+        @media (max-width: 560px) {
+          .checkout-login-fields,
+          .checkout-user-fields {
             grid-template-columns: 1fr !important;
           }
         }

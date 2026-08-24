@@ -41,13 +41,13 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div style={{ padding: '3.5rem 1.25rem', minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div style={{ padding: '1.5rem 1rem', minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="auth-page">
       <div
         className="surface-card animate-pop-in"
         style={{
           width: '100%',
           maxWidth: '440px',
-          padding: '2.5rem',
+          padding: '1.75rem',
           backgroundColor: 'var(--bg-surface)',
         }}
       >
@@ -81,12 +81,14 @@ export const LoginPage: React.FC = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
+            gap: '0.5rem',
             padding: '0.625rem 0.875rem',
             backgroundColor: 'var(--primary-light)',
             border: '1px dashed var(--primary-border)',
             borderRadius: 'var(--radius-md)',
             marginBottom: '1.5rem',
             cursor: 'pointer',
+            flexWrap: 'wrap',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8125rem', color: 'var(--primary-dark)', fontWeight: 600 }}>

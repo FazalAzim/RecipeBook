@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import {
   ShoppingBag,
@@ -22,6 +22,20 @@ export const Header: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  useEffect(() => {
+    setMobileMenuOpen(false);
+    setUserDropdownOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [mobileMenuOpen]);
+
   const handleLogout = async () => {
     await logout();
     setUserDropdownOpen(false);
@@ -44,29 +58,32 @@ export const Header: React.FC = () => {
         borderBottom: '1px solid var(--border-base)',
       }}
     >
-      <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '72px' }}>
+      <div
+        className="container header-bar"
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          minHeight: 'var(--header-height)',
+          gap: '0.5rem',
+          paddingTop: '0.5rem',
+          paddingBottom: '0.5rem',
+        }}
+      >
         {/* Brand Logo */}
-        <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', textDecoration: 'none' }}>
-          <div
-            style={{
-              width: '42px',
-              height: '42px',
-              borderRadius: 'var(--radius-md)',
-              background: 'linear-gradient(135deg, var(--primary) 0%, #C22500 100%)',
-              color: '#FFFFFF',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: 'var(--shadow-primary)',
-            }}
-          >
-            <BookOpen size={24} />
+        <Link
+          to="/"
+          className="header-brand"
+          style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none', minWidth: 0 }}
+        >
+          <div className="header-brand-icon">
+            <BookOpen className="header-brand-icon-svg" size={22} />
           </div>
-          <div>
-            <span style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-primary)', display: 'block', lineHeight: 1.1 }}>
+          <div style={{ minWidth: 0 }}>
+            <span className="header-brand-name">
               RecipeBooks<span style={{ color: 'var(--primary)' }}>.</span>
             </span>
-            <span style={{ fontSize: '0.6875rem', fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+            <span className="header-tagline">
               Digital Cookbook Market
             </span>
           </div>
@@ -130,7 +147,7 @@ export const Header: React.FC = () => {
         </nav>
 
         {/* Right Side Actions: Cart + User Auth */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.875rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
           {/* Cart Trigger */}
           <Link
             to="/cart"
@@ -176,11 +193,11 @@ export const Header: React.FC = () => {
 
           {/* User Profile or Login CTA */}
           {user ? (
-            <div style={{ position: 'relative' }}>
+            <div style={{ position: 'relative' }} className="header-desktop-auth">
               <button
                 onClick={() => setUserDropdownOpen(prev => !prev)}
                 className="btn btn-secondary"
-                style={{ padding: '0.4375rem 0.875rem', gap: '0.5rem' }}
+                style={{ padding: '0.4375rem 0.875rem', gap: '0.5rem', minHeight: '42px' }}
                 aria-expanded={userDropdownOpen}
               >
                 <div
@@ -286,13 +303,13 @@ export const Header: React.FC = () => {
               )}
             </div>
           ) : (
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', gap: '0.5rem' }} className="header-desktop-auth">
               <Link to="/login">
                 <Button variant="ghost" size="sm">
                   Log In
                 </Button>
               </Link>
-              <Link to="/register" className="hide-on-mobile">
+              <Link to="/register">
                 <Button variant="primary" size="sm">
                   Join Free
                 </Button>
@@ -310,75 +327,117 @@ export const Header: React.FC = () => {
               alignItems: 'center',
               justifyContent: 'center',
               color: 'var(--text-primary)',
+              width: '42px',
+              height: '42px',
+              borderRadius: 'var(--radius-md)',
+              border: '1.5px solid var(--border-base)',
+              backgroundColor: 'var(--bg-surface)',
             }}
             aria-label="Toggle navigation menu"
+            aria-expanded={mobileMenuOpen}
           >
-            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
         </div>
       </div>
 
       {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
-        <div
-          className="surface-card animate-slide-up"
-          style={{
-            borderTop: '1px solid var(--border-base)',
-            padding: '1.25rem',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '0.75rem',
-          }}
-        >
-          <Link
-            to="/"
+        <>
+          <div
             onClick={() => setMobileMenuOpen(false)}
-            style={{ padding: '0.5rem', fontWeight: 600, color: 'var(--text-primary)' }}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              top: 'var(--header-height)',
+              backgroundColor: 'rgba(28, 25, 23, 0.35)',
+              zIndex: 99,
+            }}
+          />
+          <div
+            className="surface-card animate-slide-up"
+            style={{
+              position: 'absolute',
+              left: 0,
+              right: 0,
+              top: '100%',
+              borderTop: '1px solid var(--border-base)',
+              borderRadius: '0 0 var(--radius-lg) var(--radius-lg)',
+              padding: '1rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.25rem',
+              zIndex: 110,
+              boxShadow: 'var(--shadow-lg)',
+              maxHeight: 'calc(100vh - var(--header-height) - 1rem)',
+              overflowY: 'auto',
+            }}
           >
-            Explore Cookbooks
-          </Link>
-          {user && (
+            <Link
+              to="/"
+              onClick={() => setMobileMenuOpen(false)}
+              style={{ padding: '0.875rem 0.75rem', fontWeight: 600, color: 'var(--text-primary)', borderRadius: 'var(--radius-md)' }}
+            >
+              Explore Cookbooks
+            </Link>
             <Link
               to="/library"
               onClick={() => setMobileMenuOpen(false)}
-              style={{ padding: '0.5rem', fontWeight: 600, color: 'var(--text-primary)' }}
+              style={{ padding: '0.875rem 0.75rem', fontWeight: 600, color: 'var(--text-primary)', borderRadius: 'var(--radius-md)' }}
             >
               My Library
             </Link>
-          )}
-          {isAdmin && (
-            <Link
-              to="/admin"
-              onClick={() => setMobileMenuOpen(false)}
-              style={{ padding: '0.5rem', fontWeight: 600, color: 'var(--primary)' }}
-            >
-              Admin Dashboard
-            </Link>
-          )}
-          {!user && (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginTop: '0.5rem' }}>
-              <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="secondary" fullWidth size="sm">
-                  Log In
-                </Button>
+            {isAdmin && (
+              <Link
+                to="/admin"
+                onClick={() => setMobileMenuOpen(false)}
+                style={{ padding: '0.875rem 0.75rem', fontWeight: 600, color: 'var(--primary)', borderRadius: 'var(--radius-md)' }}
+              >
+                Admin Dashboard
               </Link>
-              <Link to="/register" onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="primary" fullWidth size="sm">
-                  Register
-                </Button>
-              </Link>
-            </div>
-          )}
-        </div>
+            )}
+            {user ? (
+              <>
+                <div style={{ padding: '0.75rem', borderTop: '1px solid var(--border-light)', marginTop: '0.25rem' }}>
+                  <div style={{ fontWeight: 700, fontSize: '0.875rem' }}>{user.name}</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', wordBreak: 'break-all' }}>{user.email}</div>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.625rem',
+                    width: '100%',
+                    padding: '0.875rem 0.75rem',
+                    fontSize: '0.9375rem',
+                    fontWeight: 600,
+                    color: 'var(--accent-berry)',
+                    borderRadius: 'var(--radius-md)',
+                  }}
+                >
+                  <LogOut size={16} />
+                  <span>Sign Out</span>
+                </button>
+              </>
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginTop: '0.5rem', paddingTop: '0.75rem', borderTop: '1px solid var(--border-light)' }}>
+                <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="secondary" fullWidth size="sm">
+                    Log In
+                  </Button>
+                </Link>
+                <Link to="/register" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="primary" fullWidth size="sm">
+                    Register
+                  </Button>
+                </Link>
+              </div>
+            )}
+          </div>
+        </>
       )}
 
-      <style>{`
-        @media (max-width: 768px) {
-          .desktop-nav { display: none !important; }
-          .mobile-menu-btn { display: flex !important; }
-          .hide-on-mobile { display: none !important; }
-        }
-      `}</style>
     </header>
   );
 };

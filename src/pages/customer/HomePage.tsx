@@ -50,11 +50,12 @@ export const HomePage: React.FC = () => {
       <section
         style={{
           background: 'linear-gradient(180deg, #FFF8F0 0%, var(--bg-app) 100%)',
-          padding: '3.5rem 0 4rem',
+          padding: '2rem 0 2.5rem',
           borderBottom: '1px solid var(--border-light)',
           position: 'relative',
           overflow: 'hidden',
         }}
+        className="hero-section"
       >
         <div className="container hero-grid" style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '3rem', alignItems: 'center' }}>
           <div>
@@ -67,56 +68,67 @@ export const HomePage: React.FC = () => {
                 color: 'var(--primary-dark)',
                 padding: '0.375rem 0.875rem',
                 borderRadius: 'var(--radius-pill)',
-                fontSize: '0.8125rem',
+                fontSize: '0.75rem',
                 fontWeight: 700,
-                marginBottom: '1.25rem',
+                marginBottom: '1rem',
                 border: '1px solid var(--primary-border)',
+                maxWidth: '100%',
               }}
             >
-              <Flame size={16} color="var(--primary)" />
+              <Flame size={16} color="var(--primary)" style={{ flexShrink: 0 }} />
               <span>Chef-Crafted Digital Cookbooks in PDF</span>
             </div>
 
-            <h1 style={{ marginBottom: '1.25rem', color: 'var(--text-primary)', lineHeight: 1.15 }}>
+            <h1 style={{ marginBottom: '1rem', color: 'var(--text-primary)', lineHeight: 1.15 }}>
               Master Authentic Cuisines with <span style={{ color: 'var(--primary)' }}>Instant PDF</span> Cookbooks.
             </h1>
 
-            <p style={{ fontSize: '1.125rem', color: 'var(--text-secondary)', marginBottom: '2rem', lineHeight: 1.6, maxWidth: '540px' }}>
+            <p style={{ fontSize: '1rem', color: 'var(--text-secondary)', marginBottom: '1.5rem', lineHeight: 1.6, maxWidth: '540px' }}>
               Explore chef-curated recipe guides, authentic global secret techniques, and printable weeknight meal plans. Buy once, download instantly, keep forever.
             </p>
 
-            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
-              <a href="#cookbook-catalog">
-                <Button variant="primary" size="lg" rightIcon={<ArrowRight size={18} />}>
+            <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
+              <a href="#cookbook-catalog" style={{ flex: '1 1 auto', minWidth: 'min(100%, 180px)' }}>
+                <Button variant="primary" size="lg" fullWidth rightIcon={<ArrowRight size={18} />}>
                   Explore Cookbooks
                 </Button>
               </a>
-              <Link to="/library">
-                <Button variant="secondary" size="lg" leftIcon={<BookOpen size={18} />}>
+              <Link to="/library" style={{ flex: '1 1 auto', minWidth: 'min(100%, 140px)' }}>
+                <Button variant="secondary" size="lg" fullWidth leftIcon={<BookOpen size={18} />}>
                   My Library
                 </Button>
               </Link>
             </div>
 
             {/* Quick Metrics */}
-            <div style={{ display: 'flex', gap: '2rem', marginTop: '2.5rem', paddingTop: '2rem', borderTop: '1px solid var(--border-base)' }}>
-              <div>
-                <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-primary)', fontFamily: 'var(--font-heading)' }}>
+            <div
+              className="hero-metrics"
+              style={{
+                display: 'flex',
+                gap: '1.25rem',
+                marginTop: '2rem',
+                paddingTop: '1.5rem',
+                borderTop: '1px solid var(--border-base)',
+                flexWrap: 'wrap',
+              }}
+            >
+              <div style={{ minWidth: '90px' }}>
+                <div style={{ fontSize: '1.375rem', fontWeight: 800, color: 'var(--text-primary)', fontFamily: 'var(--font-heading)' }}>
                   100%
                 </div>
-                <div style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>PDF Instant Access</div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>PDF Instant Access</div>
               </div>
-              <div>
-                <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-primary)', fontFamily: 'var(--font-heading)' }}>
+              <div style={{ minWidth: '90px' }}>
+                <div style={{ fontSize: '1.375rem', fontWeight: 800, color: 'var(--text-primary)', fontFamily: 'var(--font-heading)' }}>
                   Chef
                 </div>
-                <div style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>Tested & Verified</div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Tested & Verified</div>
               </div>
-              <div>
-                <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-primary)', fontFamily: 'var(--font-heading)' }}>
+              <div style={{ minWidth: '90px' }}>
+                <div style={{ fontSize: '1.375rem', fontWeight: 800, color: 'var(--text-primary)', fontFamily: 'var(--font-heading)' }}>
                   Lifetime
                 </div>
-                <div style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>Re-Download Anytime</div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Re-Download Anytime</div>
               </div>
             </div>
           </div>
@@ -135,21 +147,24 @@ export const HomePage: React.FC = () => {
               <img
                 src="https://images.unsplash.com/photo-1556910103-1c02745aae4d?auto=format&fit=crop&w=1000&q=80"
                 alt="Culinary cookbook preparation with fresh herbs and spices"
+                className="hero-img"
                 style={{ width: '100%', height: '420px', objectFit: 'cover' }}
               />
             </div>
 
             {/* Floating Highlight Card */}
             <div
-              className="surface-card animate-slide-up"
+              className="surface-card animate-slide-up hero-float-card"
               style={{
                 position: 'absolute',
                 bottom: '-1.5rem',
-                left: '-1.5rem',
-                padding: '1rem 1.25rem',
+                left: '1rem',
+                right: '1rem',
+                maxWidth: '320px',
+                padding: '0.875rem 1rem',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.875rem',
+                gap: '0.75rem',
                 backgroundColor: 'rgba(255, 255, 255, 0.95)',
                 backdropFilter: 'blur(8px)',
                 boxShadow: 'var(--shadow-lg)',
@@ -159,8 +174,9 @@ export const HomePage: React.FC = () => {
             >
               <div
                 style={{
-                  width: '42px',
-                  height: '42px',
+                  width: '40px',
+                  height: '40px',
+                  flexShrink: 0,
                   borderRadius: '50%',
                   backgroundColor: 'var(--accent-olive-light)',
                   color: 'var(--accent-olive)',
@@ -169,10 +185,10 @@ export const HomePage: React.FC = () => {
                   justifyContent: 'center',
                 }}
               >
-                <ChefHat size={22} />
+                <ChefHat size={20} />
               </div>
               <div>
-                <div style={{ fontWeight: 700, fontSize: '0.9375rem', color: 'var(--text-primary)' }}>
+                <div style={{ fontWeight: 700, fontSize: '0.875rem', color: 'var(--text-primary)' }}>
                   Master Chef Tested
                 </div>
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
@@ -185,9 +201,9 @@ export const HomePage: React.FC = () => {
       </section>
 
       {/* Main Catalog & Filter Section */}
-      <section id="cookbook-catalog" style={{ padding: '3.5rem 0' }}>
+      <section id="cookbook-catalog" style={{ padding: '2.5rem 0' }} className="catalog-section">
         <div className="container">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1.75rem', flexWrap: 'wrap', gap: '1rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
               <h2 style={{ color: 'var(--text-primary)', marginBottom: '0.375rem' }}>
                 Featured Recipe Books & Culinary Guides
@@ -225,8 +241,24 @@ export const HomePage: React.FC = () => {
             grid-template-columns: 1fr !important;
             gap: 2rem !important;
           }
-          .hero-image-wrapper {
-            display: none;
+          .hero-img {
+            height: 240px !important;
+          }
+          .hero-float-card {
+            bottom: 0.75rem !important;
+            left: 0.75rem !important;
+            right: auto !important;
+          }
+        }
+        @media (min-width: 768px) {
+          .hero-section {
+            padding: 3.5rem 0 4rem !important;
+          }
+          .catalog-section {
+            padding: 3.5rem 0 !important;
+          }
+          .hero-img {
+            height: 420px !important;
           }
         }
       `}</style>

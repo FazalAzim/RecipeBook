@@ -28,13 +28,13 @@ export const ForgotPasswordPage: React.FC = () => {
   };
 
   return (
-    <div style={{ padding: '3.5rem 1.25rem', minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div style={{ padding: '1.5rem 1rem', minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <div
         className="surface-card animate-pop-in"
         style={{
           width: '100%',
           maxWidth: '440px',
-          padding: '2.5rem',
+          padding: '1.75rem',
           backgroundColor: 'var(--bg-surface)',
         }}
       >

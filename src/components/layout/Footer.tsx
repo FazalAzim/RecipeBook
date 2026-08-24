@@ -5,12 +5,13 @@ import { BookOpen, ShieldCheck, Download, Sparkles, Heart } from 'lucide-react';
 export const Footer: React.FC = () => {
   return (
     <footer
+      className="site-footer"
       style={{
         backgroundColor: '#1C1917',
         color: '#FAF7F2',
-        paddingTop: '4rem',
-        paddingBottom: '2.5rem',
-        marginTop: '5rem',
+        paddingTop: '2.5rem',
+        paddingBottom: '2rem',
+        marginTop: '3rem',
         borderTop: '1px solid #292524',
       }}
     >
@@ -19,7 +20,7 @@ export const Footer: React.FC = () => {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))',
             gap: '1.5rem',
             paddingBottom: '3rem',
             marginBottom: '3rem',
@@ -103,9 +104,9 @@ export const Footer: React.FC = () => {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-            gap: '2.5rem',
-            marginBottom: '3rem',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 180px), 1fr))',
+            gap: '2rem',
+            marginBottom: '2rem',
           }}
         >
           <div>
@@ -176,7 +177,7 @@ export const Footer: React.FC = () => {
             <span>for food lovers everywhere.</span>
           </div>
 
-          <div style={{ display: 'flex', gap: '1.25rem' }}>
+          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', fontSize: '0.75rem' }}>
             <Link to="/admin/login" style={{ color: '#78716C' }}>Administrator</Link>
             <span>•</span>
             <span>PDF Format E-Books</span>

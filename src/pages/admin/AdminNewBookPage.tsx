@@ -242,7 +242,7 @@ export const AdminNewBookPage: React.FC = () => {
                 {formErrors.description && <span className="form-error-msg">{formErrors.description}</span>}
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
+              <div className="form-pair" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
                 <div className="form-group">
                   <label className="form-label">Category</label>
                   <select
@@ -278,7 +278,7 @@ export const AdminNewBookPage: React.FC = () => {
                 hint="Used for search filtering and recommendations"
               />
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
+              <div className="form-pair" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
                 <Input
                   label="Price ($ USD)"
                   type="number"
@@ -524,6 +524,11 @@ export const AdminNewBookPage: React.FC = () => {
       <style>{`
         @media (max-width: 900px) {
           .admin-book-form-grid {
+            grid-template-columns: 1fr !important;
+          }
+        }
+        @media (max-width: 560px) {
+          .admin-book-form-grid .form-pair {
             grid-template-columns: 1fr !important;
           }
         }

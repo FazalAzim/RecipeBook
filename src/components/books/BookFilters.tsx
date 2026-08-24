@@ -65,6 +65,7 @@ export const BookFilters: React.FC<BookFiltersProps> = ({
     >
       {/* Top Row: Search Input & Sort & Reset */}
       <div
+        className="filters-top-row"
         style={{
           display: 'flex',
           gap: '0.875rem',
@@ -75,7 +76,7 @@ export const BookFilters: React.FC<BookFiltersProps> = ({
         }}
       >
         {/* Search Input */}
-        <div style={{ flex: '1 1 320px', position: 'relative' }}>
+        <div style={{ flex: '1 1 100%', position: 'relative' }} className="filters-search">
           <span
             style={{
               position: 'absolute',
@@ -90,7 +91,7 @@ export const BookFilters: React.FC<BookFiltersProps> = ({
           </span>
           <input
             type="text"
-            placeholder="Search by title, chef/author, ingredients, cuisine..."
+            placeholder="Search title, chef, cuisine..."
             value={filters.searchQuery}
             onChange={(e) => onChange({ ...filters, searchQuery: e.target.value })}
             className="form-input"
@@ -119,7 +120,7 @@ export const BookFilters: React.FC<BookFiltersProps> = ({
         </div>
 
         {/* Cuisine Dropdown */}
-        <div style={{ flex: '0 1 180px' }}>
+        <div style={{ flex: '1 1 140px' }}>
           <select
             value={filters.cuisine}
             onChange={(e) => onChange({ ...filters, cuisine: e.target.value })}
@@ -136,7 +137,7 @@ export const BookFilters: React.FC<BookFiltersProps> = ({
         </div>
 
         {/* Sort Selector */}
-        <div style={{ flex: '0 1 190px' }}>
+        <div style={{ flex: '1 1 140px' }}>
           <select
             value={filters.sortBy}
             onChange={(e) => onChange({ ...filters, sortBy: e.target.value as FilterState['sortBy'] })}
@@ -225,7 +226,7 @@ export const BookFilters: React.FC<BookFiltersProps> = ({
           );
         })}
 
-        <span style={{ marginLeft: 'auto', fontSize: '0.8125rem', color: 'var(--text-muted)' }}>
+        <span style={{ marginLeft: 'auto', fontSize: '0.8125rem', color: 'var(--text-muted)', width: '100%', textAlign: 'right' }} className="filters-count">
           Showing <strong style={{ color: 'var(--text-primary)' }}>{totalResults}</strong> cookbook{totalResults === 1 ? '' : 's'}
         </span>
       </div>

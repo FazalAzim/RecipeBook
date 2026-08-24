@@ -188,6 +188,7 @@ export const PaymentPage: React.FC = () => {
           <div>
             {/* Tabs Header */}
             <div
+              className="payment-method-tabs"
               style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(3, 1fr)',
@@ -511,6 +512,18 @@ export const PaymentPage: React.FC = () => {
         @media (max-width: 800px) {
           .payment-layout-grid {
             grid-template-columns: 1fr !important;
+            gap: 1.5rem !important;
+          }
+        }
+        @media (max-width: 480px) {
+          .payment-method-tabs button span {
+            font-size: 0.75rem;
+          }
+          .payment-method-tabs button {
+            flex-direction: column;
+            gap: 0.25rem !important;
+            padding: 0.5rem 0.25rem !important;
+            min-height: 52px;
           }
         }
       `}</style>

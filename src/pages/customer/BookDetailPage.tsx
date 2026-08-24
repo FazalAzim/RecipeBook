@@ -78,7 +78,7 @@ export const BookDetailPage: React.FC = () => {
   }
 
   return (
-    <div style={{ padding: '2.5rem 0 4rem' }}>
+    <div style={{ padding: '1.5rem 0 3rem' }} className="book-detail-page">
       <div className="container">
         {/* Back Link */}
         <Link
@@ -100,7 +100,7 @@ export const BookDetailPage: React.FC = () => {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'minmax(320px, 460px) 1fr',
+            gridTemplateColumns: 'minmax(min(100%, 320px), 460px) 1fr',
             gap: '3.5rem',
             alignItems: 'start',
           }}
@@ -139,7 +139,7 @@ export const BookDetailPage: React.FC = () => {
 
             {/* Quick Digital Specs Box */}
             <div
-              className="surface-card"
+              className="surface-card book-detail-specs"
               style={{
                 marginTop: '1.5rem',
                 padding: '1.25rem',
@@ -191,6 +191,7 @@ export const BookDetailPage: React.FC = () => {
 
             {/* Price Box */}
             <div
+              className="book-detail-price"
               style={{
                 backgroundColor: 'var(--primary-light)',
                 padding: '1.25rem 1.5rem',
@@ -200,6 +201,8 @@ export const BookDetailPage: React.FC = () => {
                 display: 'flex',
                 alignItems: 'baseline',
                 justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '0.75rem',
               }}
             >
               <div>
@@ -229,14 +232,14 @@ export const BookDetailPage: React.FC = () => {
                 backgroundColor: 'var(--bg-surface)',
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '1.25rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '1.25rem', flexWrap: 'wrap' }} className="book-detail-qty">
                 <div>
                   <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.375rem' }}>
                     Quantity
                   </label>
                   <QuantitySelector quantity={quantity} onChange={setQuantity} min={1} />
                 </div>
-                <div style={{ flex: 1 }}>
+                <div style={{ flex: 1, minWidth: '120px' }}>
                   <div style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>Item Subtotal</div>
                   <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-primary)', fontFamily: 'var(--font-heading)' }}>
                     ${(book.price * quantity).toFixed(2)}
@@ -244,7 +247,7 @@ export const BookDetailPage: React.FC = () => {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }} className="book-detail-ctas">
                 <Button
                   variant="secondary"
                   size="lg"
@@ -289,6 +292,7 @@ export const BookDetailPage: React.FC = () => {
 
             {/* Features Guarantee Grid */}
             <div
+              className="book-detail-features"
               style={{
                 display: 'grid',
                 gridTemplateColumns: '1fr 1fr',
@@ -327,10 +331,27 @@ export const BookDetailPage: React.FC = () => {
       </div>
 
       <style>{`
+        @media (min-width: 768px) {
+          .book-detail-page {
+            padding: 2.5rem 0 4rem !important;
+          }
+        }
         @media (max-width: 900px) {
           .book-detail-layout {
             grid-template-columns: 1fr !important;
-            gap: 2rem !important;
+            gap: 1.75rem !important;
+          }
+        }
+        @media (max-width: 640px) {
+          .book-detail-ctas,
+          .book-detail-features {
+            grid-template-columns: 1fr !important;
+          }
+          .book-detail-price {
+            padding: 1rem !important;
+          }
+          .book-detail-price > div:last-child {
+            text-align: left !important;
           }
         }
       `}</style>

@@ -62,11 +62,11 @@ export const CartPage: React.FC = () => {
             {items.map((item) => (
               <div
                 key={item.bookId}
-                className="surface-card"
+                className="surface-card cart-line-item"
                 style={{
                   padding: '1.25rem',
                   display: 'flex',
-                  gap: '1.25rem',
+                  gap: '1rem',
                   alignItems: 'center',
                 }}
               >
@@ -98,9 +98,11 @@ export const CartPage: React.FC = () => {
                         fontSize: '1rem',
                         color: 'var(--text-primary)',
                         marginBottom: '0.25rem',
-                        whiteSpace: 'nowrap',
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
                       }}
                     >
                       {item.title}
@@ -232,6 +234,19 @@ export const CartPage: React.FC = () => {
         @media (max-width: 860px) {
           .cart-layout-grid {
             grid-template-columns: 1fr !important;
+            gap: 1.5rem !important;
+          }
+        }
+        @media (max-width: 520px) {
+          .cart-line-item {
+            flex-wrap: wrap !important;
+            align-items: flex-start !important;
+          }
+          .cart-line-item > a:first-child {
+            order: 0;
+          }
+          .cart-line-item > div {
+            flex: 1 1 calc(100% - 100px) !important;
           }
         }
       `}</style>

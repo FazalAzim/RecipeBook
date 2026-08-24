@@ -114,7 +114,7 @@ export const BookCard: React.FC<BookCardProps> = ({ book }) => {
             </span>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }} className="book-card-actions">
             <Link to={`/books/${book.id}`} style={{ width: '100%' }}>
               <Button variant="secondary" size="sm" fullWidth leftIcon={<Eye size={14} />}>
                 Details
@@ -136,6 +136,11 @@ export const BookCard: React.FC<BookCardProps> = ({ book }) => {
       <style>{`
         .book-card-img:hover {
           transform: scale(1.04);
+        }
+        @media (max-width: 479px) {
+          .book-card-actions {
+            grid-template-columns: 1fr !important;
+          }
         }
       `}</style>
     </div>

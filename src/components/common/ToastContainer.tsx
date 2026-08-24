@@ -11,14 +11,16 @@ export const ToastContainer: React.FC = () => {
     <div
       style={{
         position: 'fixed',
-        top: '1.25rem',
-        right: '1.25rem',
+        top: 'max(1rem, env(safe-area-inset-top))',
+        right: 'max(1rem, env(safe-area-inset-right))',
+        left: 'max(1rem, env(safe-area-inset-left))',
         zIndex: 9999,
         display: 'flex',
         flexDirection: 'column',
         gap: '0.75rem',
         maxWidth: '380px',
-        width: 'calc(100vw - 2.5rem)',
+        width: 'auto',
+        marginLeft: 'auto',
         pointerEvents: 'none',
       }}
     >
