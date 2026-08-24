@@ -88,6 +88,7 @@ export const Header: React.FC = () => {
             </span>
           </div>
         </Link>
+        
 
         {/* Desktop Navigation Links */}
         <nav style={{ display: 'flex', alignItems: 'center', gap: '2rem' }} className="desktop-nav">
