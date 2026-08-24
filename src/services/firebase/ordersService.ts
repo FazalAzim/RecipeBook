@@ -28,6 +28,9 @@ export const ordersService = {
       throw new Error('Cart is empty. Cannot create an order.');
     }
 
+    const cleanEmail = customerEmail.trim().toLowerCase();
+    const cleanName = customerName.trim() || 'Gourmet Customer';
+
     // Step 1: Server-side price recalculation (Never trust prices sent blindly from client state)
     const verifiedOrderItems: OrderItem[] = [];
     let calculatedSubtotal = 0;
@@ -62,9 +65,9 @@ export const ordersService = {
 
     const orderData: Order = {
       id: orderId,
-      userId,
-      customerName,
-      customerEmail,
+      userId: userId || `guest_${Date.now()}`,
+      customerName: cleanName,
+      customerEmail: cleanEmail,
       items: verifiedOrderItems,
       subtotal: calculatedSubtotal,
       total: calculatedTotal,
@@ -83,12 +86,13 @@ export const ordersService = {
 
       // 2. Populate customer's Library collection and increment book salesCount
       for (const item of verifiedOrderItems) {
-        const libraryId = `${userId}_${item.bookId}`;
+        const libraryId = `${orderData.userId}_${item.bookId}_${orderId.substring(4, 9)}`;
         const libraryDocRef = doc(db, 'libraries', libraryId);
         
         await setDoc(libraryDocRef, {
           id: libraryId,
-          userId,
+          userId: orderData.userId,
+          customerEmail: cleanEmail,
           bookId: item.bookId,
           orderId,
           title: item.title,
@@ -121,8 +125,9 @@ export const ordersService = {
     // Add items to local customer library
     verifiedOrderItems.forEach(item => {
       LocalDataEngine.addToLibrary({
-        id: `${userId}_${item.bookId}`,
-        userId,
+        id: `${orderData.userId}_${item.bookId}`,
+        userId: orderData.userId,
+        customerEmail: cleanEmail,
         bookId: item.bookId,
         orderId,
         title: item.title,
@@ -140,13 +145,15 @@ export const ordersService = {
     return orderData;
   },
 
-  async getOrders(userId?: string): Promise<Order[]> {
+  async getOrders(userId?: string, email?: string): Promise<Order[]> {
     if (isFirebaseConfigured && db) {
       try {
         const ordersRef = collection(db, 'orders');
         let q = query(ordersRef, orderBy('createdAt', 'desc'));
         if (userId) {
           q = query(ordersRef, where('userId', '==', userId), orderBy('createdAt', 'desc'));
+        } else if (email) {
+          q = query(ordersRef, where('customerEmail', '==', email.toLowerCase()), orderBy('createdAt', 'desc'));
         }
         const snap = await getDocs(q);
         return snap.docs.map(d => ({ id: d.id, ...d.data() } as Order));
@@ -155,7 +162,11 @@ export const ordersService = {
       }
     }
 
-    return LocalDataEngine.getOrders(userId);
+    const orders = LocalDataEngine.getOrders(userId);
+    if (email) {
+      return orders.filter(o => o.customerEmail?.toLowerCase() === email.toLowerCase());
+    }
+    return orders;
   },
 
   async getOrderById(orderId: string): Promise<Order | null> {

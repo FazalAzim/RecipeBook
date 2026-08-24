@@ -77,6 +77,7 @@ export interface Order {
 export interface LibraryItem {
   id: string;
   userId: string;
+  customerEmail?: string;
   bookId: string;
   orderId: string;
   title: string;

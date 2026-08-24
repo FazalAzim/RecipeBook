@@ -6,7 +6,6 @@ import { CustomerLayout } from '../components/layout/CustomerLayout';
 import { AdminLayout } from '../components/layout/AdminLayout';
 
 // Route Guards
-import { ProtectedRoute } from '../components/auth/ProtectedRoute';
 import { AdminRoute } from '../components/auth/AdminRoute';
 import { GuestRoute } from '../components/auth/GuestRoute';
 
@@ -44,15 +43,8 @@ export const AppRoutes: React.FC = () => {
         <Route path="/payment" element={<PaymentPage />} />
         <Route path="/order-confirmation/:orderId" element={<OrderConfirmationPage />} />
         
-        {/* Protected Customer Library */}
-        <Route
-          path="/library"
-          element={
-            <ProtectedRoute>
-              <LibraryPage />
-            </ProtectedRoute>
-          }
-        />
+        {/* Customer Library (Accessible by both logged in users and guests with email) */}
+        <Route path="/library" element={<LibraryPage />} />
 
         {/* Guest Auth Pages with Customer Layout */}
         <Route

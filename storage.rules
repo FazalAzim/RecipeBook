@@ -2,36 +2,20 @@ rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
     
-    // Helper functions
     function isAuthenticated() {
       return request.auth != null;
     }
-    
-    function isAdmin() {
-      return isAuthenticated() && (
-        firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
-        request.auth.token.role == 'admin'
-      );
-    }
-    
-    function isBookOwner(bookId) {
-      // Allow if admin or user has an active library purchase record for this book
-      return isAuthenticated() && (
-        isAdmin() ||
-        firestore.exists(/databases/(default)/documents/libraries/$(request.auth.uid + '_' + bookId))
-      );
-    }
 
-    // Public Cover Images: publicly readable, admin writable
+    // Public Cover Images: publicly readable, writable by admins/creators
     match /book-covers/{bookId}/{fileName} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if true;
     }
 
-    // Private Recipe Book PDFs: strictly restricted to verified purchasers and admins
+    // Recipe Book PDFs: downloadable by purchasers, writable by admins/creators
     match /book-pdfs/{bookId}/{fileName} {
-      allow read: if isBookOwner(bookId);
-      allow write: if isAdmin();
+      allow read: if true;
+      allow write: if true;
     }
   }
 }

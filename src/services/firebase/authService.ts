@@ -50,6 +50,43 @@ function saveLocalUsers(users: Array<UserProfile & { passwordHash: string }>): v
   localStorage.setItem(MOCK_USERS_KEY, JSON.stringify(users));
 }
 
+function profileFromAuthUser(
+  fbUser: FirebaseUser,
+  fallbackName?: string,
+  role: UserRole = 'customer'
+): UserProfile {
+  return {
+    id: fbUser.uid,
+    name: fallbackName || fbUser.displayName || fbUser.email?.split('@')[0] || 'User',
+    email: (fbUser.email || '').toLowerCase(),
+    role,
+    createdAt: new Date().toISOString(),
+  };
+}
+
+function profileFromDoc(userId: string, data: { [key: string]: unknown }, emailFallback = ''): UserProfile {
+  return {
+    id: userId,
+    name: (data.name as string) || emailFallback.split('@')[0] || 'User',
+    email: (data.email as string) || emailFallback,
+    role: (data.role as UserRole) || 'customer',
+    createdAt: data.createdAt as UserProfile['createdAt'],
+  };
+}
+
+async function ensureUserDocument(
+  uid: string,
+  profile: Pick<UserProfile, 'name' | 'email' | 'role'>
+): Promise<void> {
+  if (!db) return;
+  await setDoc(doc(db, 'users', uid), {
+    name: profile.name,
+    email: profile.email,
+    role: profile.role || 'customer',
+    createdAt: serverTimestamp(),
+  });
+}
+
 export const authService = {
   async registerUser(name: string, email: string, password: string, role: UserRole = 'customer'): Promise<UserProfile> {
     const cleanEmail = email.trim().toLowerCase();
@@ -66,13 +103,12 @@ export const authService = {
         createdAt: new Date().toISOString(),
       };
 
-      // Create user document in Firestore
-      await setDoc(doc(db, 'users', uid), {
-        name: name.trim(),
-        email: cleanEmail,
-        role: role,
-        createdAt: serverTimestamp(),
-      });
+      try {
+        await ensureUserDocument(uid, userProfile);
+      } catch (e) {
+        console.error('Error creating user profile document:', e);
+        // Auth account already exists — still return the session so signup is not stuck.
+      }
 
       return userProfile;
     }
@@ -114,30 +150,24 @@ export const authService = {
     if (isFirebaseConfigured && auth && db) {
       const userCredential = await signInWithEmailAndPassword(auth, cleanEmail, password);
       const uid = userCredential.user.uid;
+      const fallbackProfile = profileFromAuthUser(userCredential.user, cleanEmail.split('@')[0]);
 
-      // Fetch user profile from Firestore
-      const userDoc = await getDoc(doc(db, 'users', uid));
-      if (!userDoc.exists()) {
-        // Fallback default profile if doc missing
-        const fallbackProfile: UserProfile = {
-          id: uid,
-          name: userCredential.user.displayName || cleanEmail.split('@')[0],
-          email: cleanEmail,
-          role: 'customer',
-          createdAt: new Date().toISOString()
-        };
-        await setDoc(doc(db, 'users', uid), fallbackProfile);
+      try {
+        const userDoc = await getDoc(doc(db, 'users', uid));
+        if (!userDoc.exists()) {
+          try {
+            await ensureUserDocument(uid, fallbackProfile);
+          } catch (e) {
+            console.error('Error creating missing user profile:', e);
+          }
+          return fallbackProfile;
+        }
+
+        return profileFromDoc(uid, userDoc.data(), cleanEmail);
+      } catch (e) {
+        console.error('Error fetching user profile:', e);
         return fallbackProfile;
       }
-
-      const data = userDoc.data();
-      return {
-        id: uid,
-        name: data.name || cleanEmail.split('@')[0],
-        email: data.email || cleanEmail,
-        role: data.role || 'customer',
-        createdAt: data.createdAt
-      };
     }
 
     // Local persistent simulation
@@ -186,16 +216,13 @@ export const authService = {
 
   async getUserProfile(userId: string): Promise<UserProfile | null> {
     if (isFirebaseConfigured && db) {
-      const userDoc = await getDoc(doc(db, 'users', userId));
-      if (userDoc.exists()) {
-        const data = userDoc.data();
-        return {
-          id: userId,
-          name: data.name,
-          email: data.email,
-          role: data.role || 'customer',
-          createdAt: data.createdAt
-        };
+      try {
+        const userDoc = await getDoc(doc(db, 'users', userId));
+        if (userDoc.exists()) {
+          return profileFromDoc(userId, userDoc.data());
+        }
+      } catch (e) {
+        console.error('Error fetching user profile:', e);
       }
       return null;
     }
@@ -217,29 +244,31 @@ export const authService = {
       const firestoreInstance = db;
       const unsubscribe = onAuthStateChanged(auth, async (fbUser: FirebaseUser | null) => {
         if (fbUser) {
+          const fallback = profileFromAuthUser(fbUser);
           try {
-            const userDoc = await getDoc(doc(firestoreInstance, 'users', fbUser.uid));
-            if (userDoc.exists()) {
-              const data = userDoc.data();
-              callback({
-                id: fbUser.uid,
-                name: data.name || fbUser.email?.split('@')[0] || 'User',
-                email: fbUser.email || '',
-                role: data.role || 'customer',
-                createdAt: data.createdAt
-              });
-            } else {
-              callback({
-                id: fbUser.uid,
-                name: fbUser.displayName || fbUser.email?.split('@')[0] || 'User',
-                email: fbUser.email || '',
-                role: 'customer',
-                createdAt: new Date().toISOString()
-              });
+            let userDoc = await getDoc(doc(firestoreInstance, 'users', fbUser.uid));
+
+            // Signup writes the profile right after Auth; the first read can race it.
+            if (!userDoc.exists()) {
+              await new Promise((resolve) => setTimeout(resolve, 400));
+              userDoc = await getDoc(doc(firestoreInstance, 'users', fbUser.uid));
             }
+
+            if (userDoc.exists()) {
+              callback(profileFromDoc(fbUser.uid, userDoc.data(), fbUser.email || ''));
+              return;
+            }
+
+            try {
+              await ensureUserDocument(fbUser.uid, fallback);
+            } catch (createErr) {
+              console.error('Error creating user profile:', createErr);
+            }
+            callback(fallback);
           } catch (e) {
             console.error('Error fetching user profile:', e);
-            callback(null);
+            // Keep the Auth session. callback(null) was bouncing users back to login.
+            callback(fallback);
           }
         } else {
           callback(null);

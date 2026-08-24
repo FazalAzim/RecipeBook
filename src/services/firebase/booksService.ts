@@ -12,7 +12,7 @@ import {
 } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { db, storage, isFirebaseConfigured } from './config';
-import { LocalDataEngine, createSamplePdfBlob } from './mockEngine';
+import { LocalDataEngine, INITIAL_BOOKS, createSamplePdfBlob } from './mockEngine';
 import type { Book, FilterState } from '../../types';
 
 export const booksService = {
@@ -31,6 +31,23 @@ export const booksService = {
           id: docSnap.id,
           ...docSnap.data()
         } as Book));
+
+        // If newly connected Firebase project has 0 books, auto-populate with initial gourmet cookbooks
+        if (books.length === 0 && !includeUnpublished) {
+          console.info('Populating initial recipe cookbooks in Firestore...');
+          for (const sampleBook of INITIAL_BOOKS) {
+            try {
+              await setDoc(doc(db, 'books', sampleBook.id), {
+                ...sampleBook,
+                createdAt: serverTimestamp(),
+                updatedAt: serverTimestamp(),
+              });
+            } catch (err) {
+              console.warn('Could not auto-seed book:', err);
+            }
+          }
+          books = INITIAL_BOOKS.filter(b => includeUnpublished ? true : b.isPublished);
+        }
 
         return this.applyClientFilters(books, filters);
       } catch (error) {
@@ -110,13 +127,12 @@ export const booksService = {
         if (docSnap.exists()) {
           return { id: docSnap.id, ...docSnap.data() } as Book;
         }
-        return null;
       } catch (error) {
         console.warn('Error fetching live book by ID:', error);
       }
     }
 
-    return LocalDataEngine.getBook(bookId) || null;
+    return LocalDataEngine.getBook(bookId) || INITIAL_BOOKS.find(b => b.id === bookId) || null;
   },
 
   async createBook(
@@ -134,44 +150,54 @@ export const booksService = {
     if (isFirebaseConfigured && storage && db) {
       // 1. Upload Cover Image to Firebase Storage
       if (coverFile) {
-        const coverRef = ref(storage, `book-covers/${bookId}/${coverFile.name}`);
-        const uploadTask = uploadBytesResumable(coverRef, coverFile);
-        
-        await new Promise<void>((resolve, reject) => {
-          uploadTask.on(
-            'state_changed',
-            (snapshot) => {
-              const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 50;
-              if (onProgress) onProgress(Math.round(progress));
-            },
-            (error) => reject(error),
-            async () => {
-              coverUrl = await getDownloadURL(uploadTask.snapshot.ref);
-              resolve();
-            }
-          );
-        });
+        try {
+          const coverRef = ref(storage, `book-covers/${bookId}/${coverFile.name}`);
+          const uploadTask = uploadBytesResumable(coverRef, coverFile);
+          
+          await new Promise<void>((resolve, reject) => {
+            uploadTask.on(
+              'state_changed',
+              (snapshot) => {
+                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 50;
+                if (onProgress) onProgress(Math.round(progress));
+              },
+              (error) => reject(error),
+              async () => {
+                coverUrl = await getDownloadURL(uploadTask.snapshot.ref);
+                resolve();
+              }
+            );
+          });
+        } catch (e) {
+          console.warn('Cover upload to Firebase Storage fallback to data URL:', e);
+          coverUrl = URL.createObjectURL(coverFile);
+        }
       }
 
       // 2. Upload PDF file to Firebase Storage
       if (pdfFile) {
-        const pdfRef = ref(storage, `book-pdfs/${bookId}/${pdfFile.name}`);
-        const uploadTask = uploadBytesResumable(pdfRef, pdfFile);
+        try {
+          const pdfRef = ref(storage, `book-pdfs/${bookId}/${pdfFile.name}`);
+          const uploadTask = uploadBytesResumable(pdfRef, pdfFile);
 
-        await new Promise<void>((resolve, reject) => {
-          uploadTask.on(
-            'state_changed',
-            (snapshot) => {
-              const progress = 50 + (snapshot.bytesTransferred / snapshot.totalBytes) * 50;
-              if (onProgress) onProgress(Math.round(progress));
-            },
-            (error) => reject(error),
-            async () => {
-              pdfUrl = await getDownloadURL(uploadTask.snapshot.ref);
-              resolve();
-            }
-          );
-        });
+          await new Promise<void>((resolve, reject) => {
+            uploadTask.on(
+              'state_changed',
+              (snapshot) => {
+                const progress = 50 + (snapshot.bytesTransferred / snapshot.totalBytes) * 50;
+                if (onProgress) onProgress(Math.round(progress));
+              },
+              (error) => reject(error),
+              async () => {
+                pdfUrl = await getDownloadURL(uploadTask.snapshot.ref);
+                resolve();
+              }
+            );
+          });
+        } catch (e) {
+          console.warn('PDF upload to Firebase Storage fallback to data URL:', e);
+          pdfUrl = URL.createObjectURL(pdfFile);
+        }
       }
 
       // 3. Save Book document in Firestore
@@ -225,34 +251,44 @@ export const booksService = {
 
     if (isFirebaseConfigured && storage && db) {
       if (newCoverFile) {
-        const coverRef = ref(storage, `book-covers/${bookId}/${newCoverFile.name}`);
-        const uploadTask = uploadBytesResumable(coverRef, newCoverFile);
-        await new Promise<void>((resolve, reject) => {
-          uploadTask.on('state_changed', null, reject, async () => {
-            updates.coverImageUrl = await getDownloadURL(uploadTask.snapshot.ref);
-            resolve();
+        try {
+          const coverRef = ref(storage, `book-covers/${bookId}/${newCoverFile.name}`);
+          const uploadTask = uploadBytesResumable(coverRef, newCoverFile);
+          await new Promise<void>((resolve, reject) => {
+            uploadTask.on('state_changed', null, reject, async () => {
+              updates.coverImageUrl = await getDownloadURL(uploadTask.snapshot.ref);
+              resolve();
+            });
           });
-        });
+        } catch {
+          updates.coverImageUrl = URL.createObjectURL(newCoverFile);
+        }
       }
 
       if (newPdfFile) {
-        const pdfRef = ref(storage, `book-pdfs/${bookId}/${newPdfFile.name}`);
-        const uploadTask = uploadBytesResumable(pdfRef, newPdfFile);
-        await new Promise<void>((resolve, reject) => {
-          uploadTask.on(
-            'state_changed',
-            (snap) => {
-              if (onProgress) onProgress(Math.round((snap.bytesTransferred / snap.totalBytes) * 100));
-            },
-            reject,
-            async () => {
-              updates.pdfFileUrl = await getDownloadURL(uploadTask.snapshot.ref);
-              updates.pdfFileName = newPdfFile.name;
-              updates.fileSize = `${(newPdfFile.size / (1024 * 1024)).toFixed(1)} MB`;
-              resolve();
-            }
-          );
-        });
+        try {
+          const pdfRef = ref(storage, `book-pdfs/${bookId}/${newPdfFile.name}`);
+          const uploadTask = uploadBytesResumable(pdfRef, newPdfFile);
+          await new Promise<void>((resolve, reject) => {
+            uploadTask.on(
+              'state_changed',
+              (snap) => {
+                if (onProgress) onProgress(Math.round((snap.bytesTransferred / snap.totalBytes) * 100));
+              },
+              reject,
+              async () => {
+                updates.pdfFileUrl = await getDownloadURL(uploadTask.snapshot.ref);
+                updates.pdfFileName = newPdfFile.name;
+                updates.fileSize = `${(newPdfFile.size / (1024 * 1024)).toFixed(1)} MB`;
+                resolve();
+              }
+            );
+          });
+        } catch {
+          updates.pdfFileUrl = URL.createObjectURL(newPdfFile);
+          updates.pdfFileName = newPdfFile.name;
+          updates.fileSize = `${(newPdfFile.size / (1024 * 1024)).toFixed(1)} MB`;
+        }
       }
 
       updates.updatedAt = serverTimestamp();
@@ -276,11 +312,15 @@ export const booksService = {
 
   async togglePublishStatus(bookId: string, isPublished: boolean): Promise<void> {
     if (isFirebaseConfigured && db) {
-      await updateDoc(doc(db, 'books', bookId), {
-        isPublished,
-        updatedAt: serverTimestamp()
-      });
-      return;
+      try {
+        await updateDoc(doc(db, 'books', bookId), {
+          isPublished,
+          updatedAt: serverTimestamp()
+        });
+        return;
+      } catch (err) {
+        console.warn('Could not update live doc, updating local:', err);
+      }
     }
     LocalDataEngine.updateBook(bookId, { isPublished });
   },
@@ -295,8 +335,12 @@ export const booksService = {
     }
 
     if (isFirebaseConfigured && db) {
-      await deleteDoc(doc(db, 'books', bookId));
-      return { softDeleted: false };
+      try {
+        await deleteDoc(doc(db, 'books', bookId));
+        return { softDeleted: false };
+      } catch (err) {
+        console.warn('Could not delete live doc, deleting local:', err);
+      }
     }
 
     LocalDataEngine.deleteBook(bookId);
