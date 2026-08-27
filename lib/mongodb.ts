@@ -9,12 +9,19 @@ const clientOptions: MongoClientOptions = {
   maxPoolSize: 10,
   minPoolSize: 0,
   maxIdleTimeMS: 10_000,
-  serverSelectionTimeoutMS: 10_000,
+  serverSelectionTimeoutMS: 15_000,
+  connectTimeoutMS: 15_000,
   socketTimeoutMS: 45_000,
+  // Vercel serverless can fail DNS over IPv6 for some Atlas clusters.
+  family: 4,
 };
 
 function sanitizeMongoUri(raw: string): string {
-  return raw.trim().replace(/^['"]|['"]$/g, '');
+  return raw
+    .replace(/^\uFEFF/, '')
+    .trim()
+    .replace(/^['"]|['"]$/g, '')
+    .replace(/\r?\n/g, '');
 }
 
 export function getMongoUri(): string {
@@ -31,28 +38,26 @@ export function getMongoDbName(): string {
   if (fromEnv) return fromEnv;
 
   const uri = getMongoUri();
-  try {
-    const pathname = new URL(uri).pathname.replace(/^\//, '');
-    if (pathname) {
-      return pathname.split('?')[0];
-    }
-  } catch {
-    // Ignore malformed URL parsing errors.
+  const match = uri.match(/mongodb(?:\+srv)?:\/\/[^/]+\/([^?]+)/i);
+  if (match?.[1]) {
+    return match[1];
   }
 
   return 'recipebooks';
 }
 
-function getClientPromise(): Promise<MongoClient> | null {
+async function connectMongoClient(): Promise<MongoClient> {
   const uri = getMongoUri();
   if (!isMongoConfigured()) {
-    return null;
+    throw new Error('MONGODB_URI is missing or invalid.');
   }
 
-  // Reuse the client across HMR (dev) and warm serverless invocations (Vercel).
   if (!global._mongoClientPromise) {
     const client = new MongoClient(uri, clientOptions);
-    global._mongoClientPromise = client.connect();
+    global._mongoClientPromise = client.connect().catch((error) => {
+      global._mongoClientPromise = undefined;
+      throw error;
+    });
   }
 
   return global._mongoClientPromise;
@@ -72,16 +77,10 @@ export async function getDb(dbName?: string): Promise<Db | null> {
   }
 
   try {
-    const clientPromise = getClientPromise();
-    if (!clientPromise) {
-      return null;
-    }
-
-    const connectedClient = await clientPromise;
-    return connectedClient.db(dbName || getMongoDbName());
+    const client = await connectMongoClient();
+    return client.db(dbName || getMongoDbName());
   } catch (error) {
     console.error('❌ Failed to connect to MongoDB:', error);
-    global._mongoClientPromise = undefined;
     return null;
   }
 }
@@ -91,8 +90,14 @@ export async function pingMongo(): Promise<{
   connected: boolean;
   dbName: string;
   error?: string;
+  diagnostics?: {
+    uriScheme: string;
+    uriLength: number;
+    hasDbNameEnv: boolean;
+  };
 }> {
   const dbName = getMongoDbName();
+  const uri = getMongoUri();
 
   if (!isMongoConfigured()) {
     return {
@@ -100,36 +105,44 @@ export async function pingMongo(): Promise<{
       connected: false,
       dbName,
       error: 'MONGODB_URI is missing or invalid.',
+      diagnostics: {
+        uriScheme: uri.split(':')[0] || 'none',
+        uriLength: uri.length,
+        hasDbNameEnv: Boolean(process.env.MONGODB_DB_NAME?.trim()),
+      },
     };
   }
 
   try {
-    const db = await getDb(dbName);
-    if (!db) {
-      return {
-        configured: true,
-        connected: false,
-        dbName,
-        error: 'Could not initialize MongoDB client.',
-      };
-    }
+    const client = await connectMongoClient();
+    await client.db(dbName).command({ ping: 1 });
 
-    await db.command({ ping: 1 });
     return {
       configured: true,
       connected: true,
       dbName,
+      diagnostics: {
+        uriScheme: uri.split(':')[0],
+        uriLength: uri.length,
+        hasDbNameEnv: Boolean(process.env.MONGODB_DB_NAME?.trim()),
+      },
     };
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown MongoDB error.';
     global._mongoClientPromise = undefined;
+
+    const message = error instanceof Error ? error.message : 'Unknown MongoDB error.';
     return {
       configured: true,
       connected: false,
       dbName,
       error: message,
+      diagnostics: {
+        uriScheme: uri.split(':')[0],
+        uriLength: uri.length,
+        hasDbNameEnv: Boolean(process.env.MONGODB_DB_NAME?.trim()),
+      },
     };
   }
 }
 
-export default getClientPromise;
+export default connectMongoClient;
