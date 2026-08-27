@@ -1,4 +1,4 @@
-import { MongoClient, Db, type MongoClientOptions } from 'mongodb';
+import { MongoClient, Db, ServerApiVersion, type MongoClientOptions } from 'mongodb';
 
 declare global {
   // eslint-disable-next-line no-var
@@ -12,8 +12,13 @@ const clientOptions: MongoClientOptions = {
   serverSelectionTimeoutMS: 15_000,
   connectTimeoutMS: 15_000,
   socketTimeoutMS: 45_000,
-  // Vercel serverless can fail DNS over IPv6 for some Atlas clusters.
-  family: 4,
+  // Fixes TLS "alert internal error" (SSL alert 80) on Vercel/serverless + Atlas.
+  autoSelectFamily: false,
+  serverApi: {
+    version: ServerApiVersion.v1,
+    strict: true,
+    deprecationErrors: true,
+  },
 };
 
 function sanitizeMongoUri(raw: string): string {
@@ -130,7 +135,12 @@ export async function pingMongo(): Promise<{
   } catch (error) {
     global._mongoClientPromise = undefined;
 
-    const message = error instanceof Error ? error.message : 'Unknown MongoDB error.';
+    let message = error instanceof Error ? error.message : 'Unknown MongoDB error.';
+    if (message.includes('SSL alert number 80') || message.includes('tlsv1 alert internal error')) {
+      message +=
+        ' Tip: In MongoDB Atlas, open Network Access and allow 0.0.0.0/0 for Vercel deployments.';
+    }
+
     return {
       configured: true,
       connected: false,
