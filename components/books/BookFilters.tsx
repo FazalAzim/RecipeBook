@@ -6,33 +6,31 @@ import type { FilterState } from '@/lib/types';
 
 export const CATEGORIES = [
   'All',
-  'Pakistani & South Asian',
   'Italian & European',
   'Mediterranean & Healthy',
-  'Asian & Street Food',
   'Desserts & Baking',
   'Quick & Family Meals',
+  'British & American Classics',
 ];
 
 export const CUISINES = [
   'All',
-  'Pakistani',
   'Italian',
   'Mediterranean',
-  'Asian',
   'French',
   'American',
+  'British',
 ];
 
 export const POPULAR_TAGS = [
-  'Biryani',
-  'Curry',
+  'Chocolate',
   'Pasta',
-  'Healthy',
-  'Street Food',
   'Baking',
+  'Healthy',
+  'Patisserie',
   '30 Minutes',
-  'Halal',
+  'Comfort Food',
+  'Cakes',
 ];
 
 export interface BookFiltersProps {

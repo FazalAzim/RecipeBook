@@ -4,19 +4,20 @@ import type { Book, FilterState } from '../types';
 
 export const INITIAL_BOOKS: Book[] = [
   {
-    id: 'book-pk-01',
-    title: 'Traditional Pakistani Flavors & Royal Curries',
-    author: 'Chef Ayla Farooq',
-    description: 'An authentic culinary journey through Lahore, Karachi, and Peshawar. Featuring step-by-step masterclasses on slow-cooked Biryanis, tender Nihari, succulent Karahi, fragrant aromatic rice, and house-blended garam masalas.',
-    category: 'Pakistani & South Asian',
-    cuisine: 'Pakistani',
-    tags: ['Biryani', 'Curry', 'Slow Cook', 'Authentic', 'Halal', 'Spices'],
-    price: 19.99,
-    coverImageUrl: 'https://images.unsplash.com/photo-1589302168068-964664d93dc0?auto=format&fit=crop&w=800&q=80',
+    id: 'book-eu-dessert-01',
+    title: 'Velvet Chocolate Mousse Cake Masterclass',
+    author: 'Pastry Chef Claire Dupont',
+    description:
+      'Master elegant European-style chocolate mousse cakes from your home kitchen. Learn silky mousse layers, glossy ganache glazing, chocolate shard decoration, and professional plating—perfect for dinner parties and bakery-quality celebrations across Europe and the US.',
+    category: 'Desserts & Baking',
+    cuisine: 'French',
+    tags: ['Chocolate', 'Mousse', 'Baking', 'Patisserie', 'Cakes', 'European'],
+    price: 21.99,
+    coverImageUrl: '/books/chocolate-mousse-cake-cover.png',
     pdfFileUrl: '',
-    pdfFileName: 'Traditional_Pakistani_Recipes_v2.pdf',
-    fileSize: '6.4 MB',
-    pageCount: 148,
+    pdfFileName: 'Velvet_Chocolate_Mousse_Cake_Masterclass.pdf',
+    fileSize: '7.4 MB',
+    pageCount: 156,
     createdAt: new Date('2026-01-15').toISOString(),
     updatedAt: new Date('2026-02-01').toISOString(),
     salesCount: 342,
@@ -70,32 +71,10 @@ export const INITIAL_BOOKS: Book[] = [
     reviewCount: 64,
   },
   {
-    id: 'book-asia-04',
-    title: 'Easy Asian Wok & Street Food Express',
-    author: 'Chef Kenji Chen',
-    description: 'Fast, high-heat wok cooking made simple for home kitchens. Crispy dumplings, hand-pulled noodles, Thai basil stir-fries, and sizzling Korean street barbecue ready in under 25 minutes with staple pantry items.',
-    category: 'Asian & Street Food',
-    cuisine: 'Asian',
-    tags: ['Wok', 'Quick & Easy', 'Street Food', 'Noodles', 'Stir Fry'],
-    price: 16.99,
-    coverImageUrl: 'https://images.unsplash.com/photo-1552611052-33e04de081de?auto=format&fit=crop&w=800&q=80',
-    pdfFileUrl: '',
-    pdfFileName: 'Easy_Asian_Wok_Street_Food.pdf',
-    fileSize: '4.8 MB',
-    pageCount: 130,
-    createdAt: new Date('2026-02-08').toISOString(),
-    updatedAt: new Date('2026-02-16').toISOString(),
-    salesCount: 415,
-    isPublished: true,
-    featured: false,
-    rating: 4.9,
-    reviewCount: 97,
-  },
-  {
     id: 'book-des-05',
     title: 'Traditional Desserts & French Patisserie Master',
     author: 'Pastry Chef Claire Dupont',
-    description: 'Precision pastry techniques demystified. Create flawless glossy fruit tarts, flaky croissants, cardamom gulab jamuns, velvety chocolate mousses, and elegant celebration cakes with confidence.',
+    description: 'Precision pastry techniques demystified. Create flawless glossy fruit tarts, flaky croissants, velvety chocolate mousses, and elegant celebration cakes with confidence.',
     category: 'Desserts & Baking',
     cuisine: 'French',
     tags: ['Baking', 'Pastry', 'Desserts', 'Cakes', 'Sweet Treats', 'Chocolate'],
@@ -140,6 +119,9 @@ export const INITIAL_BOOKS: Book[] = [
 // Memory store for instant mock fallback when MONGODB_URI is not yet filled
 let inMemoryBooks: Book[] = [...INITIAL_BOOKS];
 
+const DEPRECATED_BOOK_IDS = ['book-pk-01', 'book-asia-04'];
+const DEPRECATED_CATEGORIES = ['Pakistani & South Asian', 'Asian & Street Food'];
+
 export async function ensureBooksSeeded(): Promise<void> {
   const db = await getDb();
   if (!db) return;
@@ -154,6 +136,42 @@ export async function ensureBooksSeeded(): Promise<void> {
     }));
     await db.collection('books').insertMany(booksToInsert);
   }
+
+  await syncCatalogBooks();
+}
+
+/** Keeps MongoDB catalog aligned with Europe/US-focused seed data. */
+export async function syncCatalogBooks(): Promise<void> {
+  const db = await getDb();
+  if (!db) {
+    inMemoryBooks = [...INITIAL_BOOKS];
+    return;
+  }
+
+  const now = new Date();
+
+  for (const book of INITIAL_BOOKS) {
+    await db.collection('books').updateOne(
+      { id: book.id },
+      {
+        $set: {
+          ...book,
+          createdAt: new Date(book.createdAt),
+          updatedAt: now,
+        },
+      },
+      { upsert: true }
+    );
+  }
+
+  await db.collection('books').deleteMany({
+    $or: [
+      { id: { $in: DEPRECATED_BOOK_IDS } },
+      { category: { $in: DEPRECATED_CATEGORIES } },
+    ],
+  });
+
+  inMemoryBooks = [...INITIAL_BOOKS];
 }
 
 export async function getDbBooks(

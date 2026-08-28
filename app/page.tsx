@@ -163,8 +163,8 @@ export default function HomePage() {
               }}
             >
               <img
-                src="https://images.unsplash.com/photo-1589302168068-964664d93dc0?auto=format&fit=crop&w=800&q=80"
-                alt="Culinary Masterclass Cookbook"
+                src="/books/chocolate-mousse-cake-cover.png"
+                alt="Velvet Chocolate Mousse Cake Masterclass"
                 style={{
                   borderRadius: 'var(--radius-md)',
                   width: '100%',
@@ -174,8 +174,8 @@ export default function HomePage() {
               />
               <div style={{ marginTop: '0.875rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
-                  <h4 style={{ fontSize: '0.9375rem', margin: 0 }}>Traditional Royal Curries & Biryani</h4>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Chef Ayla Farooq • 148 Pages PDF</span>
+                  <h4 style={{ fontSize: '0.9375rem', margin: 0 }}>Velvet Chocolate Mousse Cake</h4>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Pastry Chef Claire Dupont • 156 Pages PDF</span>
                 </div>
                 <span className="badge badge-pdf">PDF</span>
               </div>

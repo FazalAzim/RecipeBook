@@ -23,8 +23,8 @@ export default function AdminNewBookPage() {
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
   const [description, setDescription] = useState('');
-  const [category, setCategory] = useState(CATEGORIES[1] || 'Pakistani & South Asian');
-  const [cuisine, setCuisine] = useState(CUISINES[1] || 'Pakistani');
+  const [category, setCategory] = useState(CATEGORIES[1] || 'Desserts & Baking');
+  const [cuisine, setCuisine] = useState(CUISINES[1] || 'Italian');
   const [tagsInput, setTagsInput] = useState('');
   const [price, setPrice] = useState('19.99');
   const [pageCount, setPageCount] = useState('120');
@@ -81,19 +81,17 @@ export default function AdminNewBookPage() {
   };
 
   const handleAutofillExample = () => {
-    setTitle('Mastering Mughlai Kebabs & Tandoor Secrets');
-    setAuthor('Chef Tariq Mahmood');
+    setTitle('Velvet Chocolate Mousse Cake Masterclass');
+    setAuthor('Pastry Chef Claire Dupont');
     setDescription(
-      'Unlock royal Mughal culinary heritage. Step-by-step marinades, clay-oven emulation in domestic kitchens, authentic seekh kebab spices, and fragrant mint chutneys.'
+      'Master elegant European-style chocolate mousse cakes with silky layers, glossy ganache, and professional decoration techniques for home bakers.'
     );
-    setCategory('Pakistani & South Asian');
-    setCuisine('Pakistani');
-    setTagsInput('Kebabs, Tandoor, BBQ, Spices, Grill');
-    setPrice('22.50');
-    setPageCount('154');
-    setCoverPreview(
-      'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=800&q=80'
-    );
+    setCategory('Desserts & Baking');
+    setCuisine('French');
+    setTagsInput('Chocolate, Mousse, Baking, Patisserie, Cakes');
+    setPrice('21.99');
+    setPageCount('156');
+    setCoverPreview('/books/chocolate-mousse-cake-cover.png');
     setIsPublished(true);
     setIsFeatured(true);
     showToast('Autofilled sample cookbook template!', 'info');
@@ -255,7 +253,7 @@ export default function AdminNewBookPage() {
             <Input
               label="Cookbook Title"
               required
-              placeholder="e.g. Traditional Pakistani Flavors & Royal Curries"
+              placeholder="e.g. Velvet Chocolate Mousse Cake Masterclass"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               error={formErrors.title}
@@ -305,7 +303,7 @@ export default function AdminNewBookPage() {
 
               <Input
                 label="Tags (Comma separated)"
-                placeholder="Biryani, Curry, Halal, Slow Cook"
+                placeholder="Chocolate, Baking, Patisserie, Cakes"
                 value={tagsInput}
                 onChange={(e) => setTagsInput(e.target.value)}
                 hint="Used for search filtering and chips"

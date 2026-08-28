@@ -137,11 +137,11 @@ export const Footer: React.FC = () => {
           <div>
             <h5 style={{ color: '#FFFFFF', marginBottom: '1rem', fontSize: '0.9375rem' }}>Culinary Categories</h5>
             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.625rem', fontSize: '0.875rem' }}>
-              <li><Link href="/?category=Pakistani%20%26%20South%20Asian" style={{ color: '#A8A29E' }}>Pakistani & South Asian</Link></li>
-              <li><Link href="/?category=Italian%20%26%20European" style={{ color: '#A8A29E' }}>Italian Homemade Pasta</Link></li>
-              <li><Link href="/?category=Mediterranean%20%26%20Healthy" style={{ color: '#A8A29E' }}>Mediterranean Diet</Link></li>
-              <li><Link href="/?category=Asian%20%26%20Street%20Food" style={{ color: '#A8A29E' }}>Asian Wok & Street Food</Link></li>
+              <li><Link href="/?category=Italian%20%26%20European" style={{ color: '#A8A29E' }}>Italian & European</Link></li>
+              <li><Link href="/?category=Mediterranean%20%26%20Healthy" style={{ color: '#A8A29E' }}>Mediterranean & Healthy</Link></li>
               <li><Link href="/?category=Desserts%20%26%20Baking" style={{ color: '#A8A29E' }}>Desserts & Patisserie</Link></li>
+              <li><Link href="/?category=British%20%26%20American%20Classics" style={{ color: '#A8A29E' }}>British & American Classics</Link></li>
+              <li><Link href="/?category=Quick%20%26%20Family%20Meals" style={{ color: '#A8A29E' }}>Quick Family Meals</Link></li>
             </ul>
           </div>
 

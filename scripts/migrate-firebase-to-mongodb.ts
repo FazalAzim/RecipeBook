@@ -13,19 +13,20 @@ const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/recipe
 
 const INITIAL_BOOKS = [
   {
-    id: 'book-pk-01',
-    title: 'Traditional Pakistani Flavors & Royal Curries',
-    author: 'Chef Ayla Farooq',
-    description: 'An authentic culinary journey through Lahore, Karachi, and Peshawar. Featuring step-by-step masterclasses on slow-cooked Biryanis, tender Nihari, succulent Karahi, fragrant aromatic rice, and house-blended garam masalas.',
-    category: 'Pakistani & South Asian',
-    cuisine: 'Pakistani',
-    tags: ['Biryani', 'Curry', 'Slow Cook', 'Authentic', 'Halal', 'Spices'],
-    price: 19.99,
-    coverImageUrl: 'https://images.unsplash.com/photo-1589302168068-964664d93dc0?auto=format&fit=crop&w=800&q=80',
+    id: 'book-eu-dessert-01',
+    title: 'Velvet Chocolate Mousse Cake Masterclass',
+    author: 'Pastry Chef Claire Dupont',
+    description:
+      'Master elegant European-style chocolate mousse cakes from your home kitchen. Learn silky mousse layers, glossy ganache glazing, chocolate shard decoration, and professional plating—perfect for dinner parties and bakery-quality celebrations across Europe and the US.',
+    category: 'Desserts & Baking',
+    cuisine: 'French',
+    tags: ['Chocolate', 'Mousse', 'Baking', 'Patisserie', 'Cakes', 'European'],
+    price: 21.99,
+    coverImageUrl: '/books/chocolate-mousse-cake-cover.png',
     pdfFileUrl: '',
-    pdfFileName: 'Traditional_Pakistani_Recipes_v2.pdf',
-    fileSize: '6.4 MB',
-    pageCount: 148,
+    pdfFileName: 'Velvet_Chocolate_Mousse_Cake_Masterclass.pdf',
+    fileSize: '7.4 MB',
+    pageCount: 156,
     createdAt: new Date('2026-01-15'),
     updatedAt: new Date('2026-02-01'),
     salesCount: 342,
@@ -77,28 +78,6 @@ const INITIAL_BOOKS = [
     featured: true,
     rating: 4.8,
     reviewCount: 64,
-  },
-  {
-    id: 'book-asia-04',
-    title: 'Easy Asian Wok & Street Food Express',
-    author: 'Chef Kenji Chen',
-    description: 'Fast, high-heat wok cooking made simple for home kitchens. Crispy dumplings, hand-pulled noodles, Thai basil stir-fries, and sizzling Korean street barbecue ready in under 25 minutes with staple pantry items.',
-    category: 'Asian & Street Food',
-    cuisine: 'Asian',
-    tags: ['Wok', 'Quick & Easy', 'Street Food', 'Noodles', 'Stir Fry'],
-    price: 16.99,
-    coverImageUrl: 'https://images.unsplash.com/photo-1552611052-33e04de081de?auto=format&fit=crop&w=800&q=80',
-    pdfFileUrl: '',
-    pdfFileName: 'Easy_Asian_Wok_Street_Food.pdf',
-    fileSize: '4.8 MB',
-    pageCount: 130,
-    createdAt: new Date('2026-02-08'),
-    updatedAt: new Date('2026-02-16'),
-    salesCount: 415,
-    isPublished: true,
-    featured: false,
-    rating: 4.9,
-    reviewCount: 97,
   },
   {
     id: 'book-des-05',
@@ -165,6 +144,14 @@ async function main() {
       );
     }
     console.log(`✅ Seeded/Updated ${INITIAL_BOOKS.length} recipe cookbooks.`);
+
+    await booksCol.deleteMany({
+      $or: [
+        { id: { $in: ['book-pk-01', 'book-asia-04'] } },
+        { category: { $in: ['Pakistani & South Asian', 'Asian & Street Food'] } },
+      ],
+    });
+    console.log('✅ Removed deprecated Asian/Pakistani catalog books.');
 
     // 2. Seed Default Admin
     const usersCol = db.collection('users');
