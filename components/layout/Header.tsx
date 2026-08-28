@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import {
@@ -12,7 +13,6 @@ import {
   ShieldCheck,
   Library,
   ChevronDown,
-  User,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
@@ -23,8 +23,27 @@ export const Header: React.FC = () => {
   const { totalItems } = useCart();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const [headerHeight, setHeaderHeight] = useState(64);
+  const [mounted, setMounted] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
   const router = useRouter();
   const pathname = usePathname() || '';
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const measureHeaderHeight = () => {
+    if (headerRef.current) {
+      setHeaderHeight(headerRef.current.getBoundingClientRect().height);
+    }
+  };
+
+  useLayoutEffect(() => {
+    measureHeaderHeight();
+    window.addEventListener('resize', measureHeaderHeight);
+    return () => window.removeEventListener('resize', measureHeaderHeight);
+  }, [pathname, mobileMenuOpen]);
 
   // Close mobile drawer and user menu on route navigation
   useEffect(() => {
@@ -32,21 +51,29 @@ export const Header: React.FC = () => {
     setUserDropdownOpen(false);
   }, [pathname]);
 
-  // Lock body scroll when mobile menu is open
+  // Lock body scroll when mobile menu is open (iOS-safe)
   useEffect(() => {
     if (!mobileMenuOpen) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+
+    const scrollY = window.scrollY;
+    document.body.classList.add('mobile-nav-open');
+    document.body.style.top = `-${scrollY}px`;
+
     return () => {
-      document.body.style.overflow = prev;
+      document.body.classList.remove('mobile-nav-open');
+      document.body.style.top = '';
+      window.scrollTo(0, scrollY);
     };
   }, [mobileMenuOpen]);
 
   const handleLogout = async () => {
-    await logout();
+    setMobileMenuOpen(false);
     setUserDropdownOpen(false);
+    await logout();
     router.push('/');
   };
+
+  const closeMobileMenu = () => setMobileMenuOpen(false);
 
   const navLinks = [
     { label: 'Explore Books', path: '/' },
@@ -55,15 +82,23 @@ export const Header: React.FC = () => {
 
   return (
     <header
+      ref={headerRef}
+      className={mobileMenuOpen ? 'site-header site-header--menu-open' : 'site-header'}
       style={{
         position: 'sticky',
         top: 0,
-        zIndex: 100,
+        zIndex: mobileMenuOpen ? 10002 : 100,
         backgroundColor: 'rgba(255, 253, 249, 0.95)',
-        backdropFilter: 'blur(8px)',
         borderBottom: '1px solid var(--border-base)',
       }}
     >
+      <div
+        className="site-header-blur"
+        style={{
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)',
+        }}
+      >
       <div
         className="container header-bar"
         style={{
@@ -316,109 +351,96 @@ export const Header: React.FC = () => {
           </button>
         </div>
       </div>
+      </div>
 
-      {/* Mobile Drawer Menu */}
-      {mobileMenuOpen && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            top: 'var(--header-height)',
-            backgroundColor: 'var(--bg-surface)',
-            zIndex: 99,
-            padding: '1.5rem',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '1.5rem',
-            overflowY: 'auto',
-          }}
-          className="animate-slide-up"
-        >
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            <Link
-              href="/"
-              onClick={() => setMobileMenuOpen(false)}
-              style={{
-                padding: '0.75rem',
-                fontSize: '1.125rem',
-                fontWeight: 600,
-                color: pathname === '/' ? 'var(--primary)' : 'var(--text-primary)',
-                borderBottom: '1px solid var(--border-light)',
-              }}
+      {mounted &&
+        mobileMenuOpen &&
+        createPortal(
+          <>
+            <button
+              type="button"
+              className="mobile-nav-backdrop"
+              onClick={closeMobileMenu}
+              aria-label="Close navigation menu"
+            />
+            <nav
+              className="mobile-nav-panel animate-slide-up"
+              style={{ top: `${headerHeight}px` }}
+              aria-label="Mobile navigation"
             >
-              Explore Cookbooks
-            </Link>
-            <Link
-              href="/library"
-              onClick={() => setMobileMenuOpen(false)}
-              style={{
-                padding: '0.75rem',
-                fontSize: '1.125rem',
-                fontWeight: 600,
-                color: pathname === '/library' ? 'var(--primary)' : 'var(--text-primary)',
-                borderBottom: '1px solid var(--border-light)',
-              }}
-            >
-              My Recipe Library
-            </Link>
-            <Link
-              href="/cart"
-              onClick={() => setMobileMenuOpen(false)}
-              style={{
-                padding: '0.75rem',
-                fontSize: '1.125rem',
-                fontWeight: 600,
-                color: pathname === '/cart' ? 'var(--primary)' : 'var(--text-primary)',
-                borderBottom: '1px solid var(--border-light)',
-                display: 'flex',
-                justifyContent: 'space-between',
-              }}
-            >
-              <span>Shopping Cart</span>
-              {totalItems > 0 && <span className="badge badge-primary">{totalItems}</span>}
-            </Link>
-          </div>
-
-          <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            {user ? (
-              <>
-                <div style={{ padding: '0.75rem', backgroundColor: 'var(--bg-subtle)', borderRadius: 'var(--radius-md)' }}>
-                  <div style={{ fontWeight: 700 }}>{user.name}</div>
-                  <div style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>{user.email}</div>
+              <div className="mobile-nav-scroll">
+                <div className="mobile-nav-links">
+                  <Link
+                    href="/"
+                    onClick={closeMobileMenu}
+                    className={`mobile-nav-link${pathname === '/' ? ' mobile-nav-link--active' : ''}`}
+                  >
+                    Explore Cookbooks
+                  </Link>
+                  <Link
+                    href="/library"
+                    onClick={closeMobileMenu}
+                    className={`mobile-nav-link${pathname === '/library' ? ' mobile-nav-link--active' : ''}`}
+                  >
+                    My Recipe Library
+                  </Link>
+                  <Link
+                    href="/cart"
+                    onClick={closeMobileMenu}
+                    className={`mobile-nav-link mobile-nav-link--cart${pathname === '/cart' ? ' mobile-nav-link--active' : ''}`}
+                  >
+                    <span>Shopping Cart</span>
+                    {totalItems > 0 && <span className="badge badge-primary">{totalItems}</span>}
+                  </Link>
                 </div>
 
-                {isAdmin && (
-                  <Link href="/admin" onClick={() => setMobileMenuOpen(false)}>
-                    <Button variant="secondary" fullWidth leftIcon={<ShieldCheck size={18} />}>
-                      Admin Dashboard
-                    </Button>
-                  </Link>
-                )}
+                <div className="mobile-nav-footer">
+                  {user ? (
+                    <>
+                      <div className="mobile-nav-user-card">
+                        <div style={{ fontWeight: 700 }}>{user.name}</div>
+                        <div className="mobile-nav-user-email">{user.email}</div>
+                      </div>
 
-                <Button variant="danger" fullWidth leftIcon={<LogOut size={18} />} onClick={handleLogout}>
-                  Log Out
-                </Button>
-              </>
-            ) : (
-              <>
-                <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="secondary" fullWidth>
-                    Log In
-                  </Button>
-                </Link>
-                <Link href="/register" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="primary" fullWidth>
-                    Create Free Account
-                  </Button>
-                </Link>
-                <Link href="/admin/login" onClick={() => setMobileMenuOpen(false)} style={{ textAlign: 'center', marginTop: '0.5rem', color: 'var(--text-muted)', fontSize: '0.8125rem' }}>
-                  Admin Portal Login
-                </Link>
-              </>
-            )}
-          </div>
-        </div>
-      )}
+                      {isAdmin && (
+                        <Link href="/admin" onClick={closeMobileMenu}>
+                          <Button variant="secondary" fullWidth leftIcon={<ShieldCheck size={18} />}>
+                            Admin Dashboard
+                          </Button>
+                        </Link>
+                      )}
+
+                      <Button variant="danger" fullWidth leftIcon={<LogOut size={18} />} onClick={handleLogout}>
+                        Log Out
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Link href="/login" onClick={closeMobileMenu}>
+                        <Button variant="secondary" fullWidth>
+                          Log In
+                        </Button>
+                      </Link>
+                      <Link href="/register" onClick={closeMobileMenu}>
+                        <Button variant="primary" fullWidth>
+                          Create Free Account
+                        </Button>
+                      </Link>
+                      <Link
+                        href="/admin/login"
+                        onClick={closeMobileMenu}
+                        className="mobile-nav-admin-link"
+                      >
+                        Admin Portal Login
+                      </Link>
+                    </>
+                  )}
+                </div>
+              </div>
+            </nav>
+          </>,
+          document.body
+        )}
     </header>
   );
 };
