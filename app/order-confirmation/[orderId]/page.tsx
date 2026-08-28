@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, use } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import confetti from 'canvas-confetti';
 import {
   CheckCircle2,
@@ -12,6 +13,7 @@ import {
   FileText,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCart } from '@/contexts/CartContext';
 import { useToast } from '@/contexts/ToastContext';
 import { Button } from '@/components/common/Button';
 import { Badge } from '@/components/common/Badge';
@@ -25,13 +27,22 @@ export default function OrderConfirmationPage({
   params: Promise<{ orderId: string }>;
 }) {
   const { orderId } = use(params);
+  const searchParams = useSearchParams();
   const { user } = useAuth();
+  const { clearCart } = useCart();
   const { showToast } = useToast();
 
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [downloadingBookId, setDownloadingBookId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (searchParams.get('stripe_success') === 'true') {
+      clearCart();
+      sessionStorage.removeItem('recipebooks_checkout_customer');
+    }
+  }, [searchParams, clearCart]);
 
   useEffect(() => {
     // Launch celebratory confetti!
