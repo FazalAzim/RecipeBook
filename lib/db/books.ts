@@ -2,176 +2,69 @@ import { getDb, isMongoConfigured } from '../mongodb';
 import { resolveR2AssetUrl } from '../r2';
 import type { Book, FilterState } from '../types';
 
-export const INITIAL_BOOKS: Book[] = [
-  {
-    id: 'book-eu-dessert-01',
-    title: 'Velvet Chocolate Mousse Cake Masterclass',
-    author: 'Pastry Chef Claire Dupont',
-    description:
-      'Master elegant European-style chocolate mousse cakes from your home kitchen. Learn silky mousse layers, glossy ganache glazing, chocolate shard decoration, and professional plating—perfect for dinner parties and bakery-quality celebrations across Europe and the US.',
-    category: 'Desserts & Baking',
-    cuisine: 'French',
-    tags: ['Chocolate', 'Mousse', 'Baking', 'Patisserie', 'Cakes', 'European'],
-    price: 21.99,
-    coverImageUrl: '/books/chocolate-mousse-cake-cover.png',
-    pdfFileUrl: '',
-    pdfFileName: 'Velvet_Chocolate_Mousse_Cake_Masterclass.pdf',
-    fileSize: '7.4 MB',
-    pageCount: 156,
-    createdAt: new Date('2026-01-15').toISOString(),
-    updatedAt: new Date('2026-02-01').toISOString(),
-    salesCount: 342,
-    isPublished: true,
-    featured: true,
-    rating: 4.9,
-    reviewCount: 88,
-  },
-  {
-    id: 'book-it-02',
-    title: 'Italian Homemade Pasta: The Nonna’s Handbook',
-    author: 'Chef Marco Rossi',
-    description: 'Master the timeless craft of artisanal pasta from scratch. From silky tagliatelle and hand-pinched tortellini to rich Tuscan ragù, Roman carbonara, and airy focaccia. Packed with high-resolution folding diagrams.',
-    category: 'Italian & European',
-    cuisine: 'Italian',
-    tags: ['Pasta', 'Handmade', 'Comfort Food', 'Tuscan', 'Sauces'],
-    price: 24.50,
-    coverImageUrl: 'https://images.unsplash.com/photo-1621996346565-e3d5d628169b?auto=format&fit=crop&w=800&q=80',
-    pdfFileUrl: '',
-    pdfFileName: 'Italian_Homemade_Pasta_Masterclass.pdf',
-    fileSize: '8.2 MB',
-    pageCount: 196,
-    createdAt: new Date('2026-01-20').toISOString(),
-    updatedAt: new Date('2026-02-10').toISOString(),
-    salesCount: 520,
-    isPublished: true,
-    featured: true,
-    rating: 5.0,
-    reviewCount: 142,
-  },
-  {
-    id: 'book-med-03',
-    title: 'Healthy Mediterranean: Sun-Drenched Everyday Meals',
-    author: 'Dr. Elena Vasquez',
-    description: 'Nourishing, heart-healthy recipes rich in extra virgin olive oil, crisp vegetables, fresh seafood, herbs, and vibrant citrus. Includes complete 30-day seasonal meal plans and dietitian nutritional breakdowns.',
-    category: 'Mediterranean & Healthy',
-    cuisine: 'Mediterranean',
-    tags: ['Healthy', 'Olive Oil', 'Heart-Smart', 'Seafood', 'Salads', 'Clean Eating'],
-    price: 18.00,
-    coverImageUrl: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=800&q=80',
-    pdfFileUrl: '',
-    pdfFileName: 'Healthy_Mediterranean_Cooking.pdf',
-    fileSize: '5.1 MB',
-    pageCount: 160,
-    createdAt: new Date('2026-02-05').toISOString(),
-    updatedAt: new Date('2026-02-14').toISOString(),
-    salesCount: 290,
-    isPublished: true,
-    featured: true,
-    rating: 4.8,
-    reviewCount: 64,
-  },
-  {
-    id: 'book-des-05',
-    title: 'Traditional Desserts & French Patisserie Master',
-    author: 'Pastry Chef Claire Dupont',
-    description: 'Precision pastry techniques demystified. Create flawless glossy fruit tarts, flaky croissants, velvety chocolate mousses, and elegant celebration cakes with confidence.',
-    category: 'Desserts & Baking',
-    cuisine: 'French',
-    tags: ['Baking', 'Pastry', 'Desserts', 'Cakes', 'Sweet Treats', 'Chocolate'],
-    price: 22.00,
-    coverImageUrl: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=800&q=80',
-    pdfFileUrl: '',
-    pdfFileName: 'Traditional_Desserts_and_Baking.pdf',
-    fileSize: '9.6 MB',
-    pageCount: 220,
-    createdAt: new Date('2026-01-28').toISOString(),
-    updatedAt: new Date('2026-02-12').toISOString(),
-    salesCount: 180,
-    isPublished: true,
-    featured: false,
-    rating: 4.9,
-    reviewCount: 51,
-  },
-  {
-    id: 'book-fam-06',
-    title: 'Quick Family Meals: 30-Minute Weeknight Magic',
-    author: 'Sarah Jenkins',
-    description: 'Stress-free, kid-approved, one-pot and sheet-pan dinners that bring everyone together. Includes budget shopping guides, freezer-prep tips, and minimal cleanup techniques for busy households.',
-    category: 'Quick & Family Meals',
-    cuisine: 'American',
-    tags: ['One Pot', 'Weeknight', 'Family Friendly', 'Budget', '30 Minutes'],
-    price: 14.99,
-    coverImageUrl: 'https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=800&q=80',
-    pdfFileUrl: '',
-    pdfFileName: 'Quick_Family_Meals_30Min.pdf',
-    fileSize: '3.9 MB',
-    pageCount: 112,
-    createdAt: new Date('2026-02-10').toISOString(),
-    updatedAt: new Date('2026-02-18').toISOString(),
-    salesCount: 310,
-    isPublished: true,
-    featured: true,
-    rating: 4.7,
-    reviewCount: 73,
-  }
+/** Legacy demo/seed catalog IDs — removed so only admin-created books remain. */
+const LEGACY_SEED_BOOK_IDS = [
+  'book-pk-01',
+  'book-asia-04',
+  'book-it-02',
+  'book-med-03',
+  'book-des-05',
+  'book-fam-06',
+  'book-eu-dessert-01',
 ];
 
-// Memory store for instant mock fallback when MONGODB_URI is not yet filled
-let inMemoryBooks: Book[] = [...INITIAL_BOOKS];
+const LEGACY_SEED_CATEGORIES = ['Pakistani & South Asian', 'Asian & Street Food'];
 
-const DEPRECATED_BOOK_IDS = ['book-pk-01', 'book-asia-04'];
-const DEPRECATED_CATEGORIES = ['Pakistani & South Asian', 'Asian & Street Food'];
+// Runtime cache when MongoDB is unavailable (dev without DB)
+let inMemoryBooks: Book[] = [];
 
-export async function ensureBooksSeeded(): Promise<void> {
+let legacyBooksPurged = false;
+
+/** One-time cleanup of hardcoded seed/demo books from MongoDB. */
+export async function purgeLegacySeedBooks(): Promise<void> {
+  if (legacyBooksPurged) return;
+
   const db = await getDb();
   if (!db) return;
 
-  const count = await db.collection('books').countDocuments();
-  if (count === 0) {
-    console.info('🌱 Seeding initial recipe books into MongoDB...');
-    const booksToInsert = INITIAL_BOOKS.map((b) => ({
-      ...b,
-      createdAt: new Date(b.createdAt),
-      updatedAt: new Date(b.updatedAt),
-    }));
-    await db.collection('books').insertMany(booksToInsert);
-  }
-
-  await syncCatalogBooks();
-}
-
-/** Keeps MongoDB catalog aligned with Europe/US-focused seed data. */
-export async function syncCatalogBooks(): Promise<void> {
-  const db = await getDb();
-  if (!db) {
-    inMemoryBooks = [...INITIAL_BOOKS];
-    return;
-  }
-
-  const now = new Date();
-
-  for (const book of INITIAL_BOOKS) {
-    await db.collection('books').updateOne(
-      { id: book.id },
-      {
-        $set: {
-          ...book,
-          createdAt: new Date(book.createdAt),
-          updatedAt: now,
-        },
-      },
-      { upsert: true }
-    );
-  }
-
-  await db.collection('books').deleteMany({
+  const result = await db.collection('books').deleteMany({
     $or: [
-      { id: { $in: DEPRECATED_BOOK_IDS } },
-      { category: { $in: DEPRECATED_CATEGORIES } },
+      { id: { $in: LEGACY_SEED_BOOK_IDS } },
+      { category: { $in: LEGACY_SEED_CATEGORIES } },
     ],
   });
 
-  inMemoryBooks = [...INITIAL_BOOKS];
+  if (result.deletedCount > 0) {
+    console.info(`Removed ${result.deletedCount} legacy seed cookbook(s) from MongoDB.`);
+  }
+
+  legacyBooksPurged = true;
+}
+
+function mapDocToBook(d: Record<string, unknown>): Book {
+  const id = (d.id || (d._id as { toString(): string }).toString()) as string;
+  return {
+    id,
+    title: d.title as string,
+    author: d.author as string,
+    description: d.description as string,
+    category: d.category as string,
+    cuisine: d.cuisine as string,
+    tags: (d.tags || []) as string[],
+    price: Number(d.price),
+    coverImageUrl: resolveR2AssetUrl((d.coverImageUrl || '') as string),
+    pdfFileUrl: (d.pdfFileUrl || '') as string,
+    pdfFileName: (d.pdfFileName || '') as string,
+    fileSize: (d.fileSize || '') as string,
+    pageCount: Number(d.pageCount || 100),
+    salesCount: Number(d.salesCount || 0),
+    isPublished: Boolean(d.isPublished),
+    featured: Boolean(d.featured),
+    rating: Number(d.rating || 5.0),
+    reviewCount: Number(d.reviewCount || 1),
+    createdAt: d.createdAt ? new Date(d.createdAt as string).toISOString() : new Date().toISOString(),
+    updatedAt: d.updatedAt ? new Date(d.updatedAt as string).toISOString() : new Date().toISOString(),
+  };
 }
 
 export async function getDbBooks(
@@ -184,35 +77,15 @@ export async function getDbBooks(
 
   if (db && isMongoConfigured()) {
     try {
-      await ensureBooksSeeded();
+      await purgeLegacySeedBooks();
+
       const query: Record<string, unknown> = {};
       if (!includeUnpublished) {
         query.isPublished = true;
       }
 
       const docs = await db.collection('books').find(query).toArray();
-      books = docs.map((d) => ({
-        id: (d.id || d._id.toString()) as string,
-        title: d.title as string,
-        author: d.author as string,
-        description: d.description as string,
-        category: d.category as string,
-        cuisine: d.cuisine as string,
-        tags: (d.tags || []) as string[],
-        price: Number(d.price),
-        coverImageUrl: resolveR2AssetUrl((d.coverImageUrl || '') as string),
-        pdfFileUrl: (d.pdfFileUrl || '') as string,
-        pdfFileName: (d.pdfFileName || '') as string,
-        fileSize: (d.fileSize || '') as string,
-        pageCount: Number(d.pageCount || 100),
-        salesCount: Number(d.salesCount || 0),
-        isPublished: Boolean(d.isPublished),
-        featured: Boolean(d.featured),
-        rating: Number(d.rating || 5.0),
-        reviewCount: Number(d.reviewCount || 1),
-        createdAt: d.createdAt ? new Date(d.createdAt).toISOString() : new Date().toISOString(),
-        updatedAt: d.updatedAt ? new Date(d.updatedAt).toISOString() : new Date().toISOString(),
-      }));
+      books = docs.map((d) => mapDocToBook(d as Record<string, unknown>));
     } catch (err) {
       console.warn('MongoDB query error for books, using memory fallback:', err);
       books = [...inMemoryBooks];
@@ -232,32 +105,13 @@ export async function getDbBookById(bookId: string): Promise<Book | null> {
   const db = await getDb();
   if (db && isMongoConfigured()) {
     try {
+      await purgeLegacySeedBooks();
+
       const doc = await db.collection('books').findOne({
         $or: [{ id: bookId }, { _id: (bookId.length === 24 ? { $oid: bookId } : undefined) as any }],
       });
       if (doc) {
-        return {
-          id: (doc.id || doc._id.toString()) as string,
-          title: doc.title as string,
-          author: doc.author as string,
-          description: doc.description as string,
-          category: doc.category as string,
-          cuisine: doc.cuisine as string,
-          tags: (doc.tags || []) as string[],
-          price: Number(doc.price),
-          coverImageUrl: resolveR2AssetUrl((doc.coverImageUrl || '') as string),
-          pdfFileUrl: (doc.pdfFileUrl || '') as string,
-          pdfFileName: (doc.pdfFileName || '') as string,
-          fileSize: (doc.fileSize || '') as string,
-          pageCount: Number(doc.pageCount || 100),
-          salesCount: Number(doc.salesCount || 0),
-          isPublished: Boolean(doc.isPublished),
-          featured: Boolean(doc.featured),
-          rating: Number(doc.rating || 5.0),
-          reviewCount: Number(doc.reviewCount || 1),
-          createdAt: doc.createdAt ? new Date(doc.createdAt).toISOString() : new Date().toISOString(),
-          updatedAt: doc.updatedAt ? new Date(doc.updatedAt).toISOString() : new Date().toISOString(),
-        };
+        return mapDocToBook(doc as Record<string, unknown>);
       }
     } catch (err) {
       console.warn('Error fetching book from MongoDB:', err);

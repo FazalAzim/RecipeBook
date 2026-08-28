@@ -44,10 +44,10 @@ export default function AdminLayout({
 
   const handleSeedDatabase = async () => {
     try {
-      showToast('Seeding gourmet recipe books...', 'info');
+      showToast('Initializing database...', 'info');
       const res = await fetch('/api/admin/seed', { method: 'POST' });
-      if (!res.ok) throw new Error('Seeding failed');
-      showToast('Successfully seeded recipe books and admin account!', 'success');
+      if (!res.ok) throw new Error('Initialization failed');
+      showToast('Database ready. Demo books removed; admin account ensured.', 'success');
       window.location.reload();
     } catch (e: any) {
       showToast(e.message || 'Seeding failed', 'error');

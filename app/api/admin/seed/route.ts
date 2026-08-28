@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { ensureBooksSeeded } from '@/lib/db/books';
+import { purgeLegacySeedBooks } from '@/lib/db/books';
 import { ensureDefaultUsers } from '@/lib/db/users';
 import { getSessionUser } from '@/lib/auth';
 
@@ -10,11 +10,14 @@ export async function POST() {
       return NextResponse.json({ error: 'Unauthorized: Admin access required.' }, { status: 403 });
     }
 
-    await ensureBooksSeeded();
+    await purgeLegacySeedBooks();
     await ensureDefaultUsers();
 
-    return NextResponse.json({ success: true, message: 'Database seeded with default cookbooks and admin account.' });
+    return NextResponse.json({
+      success: true,
+      message: 'Database initialized. Legacy demo books removed; admin account ready.',
+    });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message || 'Seeding failed.' }, { status: 500 });
+    return NextResponse.json({ error: error.message || 'Initialization failed.' }, { status: 500 });
   }
 }
