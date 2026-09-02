@@ -5,6 +5,38 @@ import type { CartItem, Order, OrderItem, PaymentMethod } from '../types';
 
 let inMemoryOrders: Order[] = [];
 
+function isMongoDuplicateKeyError(error: unknown): boolean {
+  if (!error || typeof error !== 'object') return false;
+
+  const mongoError = error as { code?: number; writeErrors?: Array<{ code?: number }> };
+  if (mongoError.code === 11000) return true;
+
+  return mongoError.writeErrors?.some((entry) => entry.code === 11000) ?? false;
+}
+
+async function findExistingOrderForIdempotencyKeys(params: {
+  paymentReferenceId?: string;
+  lemonSqueezyOrderId?: string;
+  stripeSessionId?: string;
+}): Promise<Order | null> {
+  if (params.lemonSqueezyOrderId) {
+    const byLemonOrder = await getDbOrderByLemonSqueezyOrderId(params.lemonSqueezyOrderId);
+    if (byLemonOrder) return byLemonOrder;
+  }
+
+  if (params.paymentReferenceId) {
+    const byReference = await getDbOrderByPaymentReferenceId(params.paymentReferenceId);
+    if (byReference) return byReference;
+  }
+
+  if (params.stripeSessionId) {
+    const byStripeSession = await getDbOrderByStripeSessionId(params.stripeSessionId);
+    if (byStripeSession) return byStripeSession;
+  }
+
+  return null;
+}
+
 function mapOrderDoc(doc: Record<string, unknown>): Order {
   return {
     id: (doc.id || (doc._id as { toString(): string }).toString()) as string,
@@ -140,13 +172,40 @@ export async function createDbOrder(params: {
         createdAt: now,
       });
     } catch (err) {
-      console.warn('Error saving order to MongoDB:', err);
+      if (isMongoDuplicateKeyError(err)) {
+        const existing = await findExistingOrderForIdempotencyKeys({
+          paymentReferenceId,
+          lemonSqueezyOrderId,
+          stripeSessionId,
+        });
+
+        if (existing) {
+          return existing;
+        }
+      }
+
+      throw err instanceof Error ? err : new Error('Failed to save order to MongoDB.');
     }
+
+    inMemoryOrders.unshift(orderData);
+
+    // Side effects run only after a successful (non-duplicate) insert.
+    await addItemsToLibrary({
+      userId: orderData.userId,
+      customerEmail: cleanEmail,
+      orderId,
+      items: verifiedOrderItems,
+    });
+
+    for (const item of verifiedOrderItems) {
+      await incrementBookSalesCount(item.bookId, item.quantity);
+    }
+
+    return orderData;
   }
 
   inMemoryOrders.unshift(orderData);
 
-  // Grant instant library access to verified purchaser
   await addItemsToLibrary({
     userId: orderData.userId,
     customerEmail: cleanEmail,
@@ -154,7 +213,6 @@ export async function createDbOrder(params: {
     items: verifiedOrderItems,
   });
 
-  // Increment sales count on purchased books
   for (const item of verifiedOrderItems) {
     await incrementBookSalesCount(item.bookId, item.quantity);
   }

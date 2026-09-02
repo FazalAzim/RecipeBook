@@ -22,6 +22,8 @@ export interface FulfillCheckoutParams {
 export async function fulfillCheckoutOrder(params: FulfillCheckoutParams): Promise<Order | null> {
   const { paymentReferenceId } = params;
 
+  // Fast-path idempotency checks. Concurrent webhook + /fulfill calls can both miss
+  // these before either inserts; createDbOrder() enforces uniqueness via MongoDB indexes.
   const existingByReference = await getDbOrderByPaymentReferenceId(paymentReferenceId);
   if (existingByReference) {
     await markPendingCheckoutFulfilled(paymentReferenceId);
