@@ -15,6 +15,7 @@ import { useToast } from '@/contexts/ToastContext';
 import { Button } from '@/components/common/Button';
 import { Input } from '@/components/common/Input';
 import { CATEGORIES, CUISINES } from '@/components/books/BookFilters';
+import { uploadBookAsset } from '@/lib/upload-client';
 
 export default function AdminNewBookPage() {
   const router = useRouter();
@@ -129,43 +130,13 @@ export default function AdminNewBookPage() {
       // 1. Upload cover image if provided
       if (coverFile) {
         setUploadProgress(30);
-        const formData = new FormData();
-        formData.append('file', coverFile);
-        formData.append('type', 'cover');
-        formData.append('bookId', draftBookId);
-
-        const uploadRes = await fetch('/api/uploads', {
-          method: 'POST',
-          body: formData,
-        });
-
-        if (!uploadRes.ok) {
-          const errData = await uploadRes.json().catch(() => ({}));
-          throw new Error(errData.error || 'Cover image upload failed.');
-        }
-
-        const uploadData = await uploadRes.json();
+        const uploadData = await uploadBookAsset(coverFile, 'cover', draftBookId);
         coverImageUrl = uploadData.url;
       }
 
-      // 2. Upload PDF document (required)
+      // 2. Upload PDF document (required) — direct to R2, bypasses Vercel 4.5 MB limit
       setUploadProgress(60);
-      const pdfFormData = new FormData();
-      pdfFormData.append('file', pdfFile!);
-      pdfFormData.append('type', 'pdf');
-      pdfFormData.append('bookId', draftBookId);
-
-      const uploadRes = await fetch('/api/uploads', {
-        method: 'POST',
-        body: pdfFormData,
-      });
-
-      if (!uploadRes.ok) {
-        const errData = await uploadRes.json().catch(() => ({}));
-        throw new Error(errData.error || 'PDF upload failed. Check Cloudflare R2 configuration.');
-      }
-
-      const uploadData = await uploadRes.json();
+      const uploadData = await uploadBookAsset(pdfFile!, 'pdf', draftBookId);
       pdfFileUrl = uploadData.url;
       pdfFileName = uploadData.fileName;
       fileSize = uploadData.fileSize;

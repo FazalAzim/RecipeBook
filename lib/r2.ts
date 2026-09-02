@@ -130,6 +130,16 @@ export function resolveR2AssetUrl(storedUrl: string): string {
 }
 
 /**
+ * Returns the URL stored on book records for an R2 object key.
+ */
+export function getR2StoredUrl(key: string): string {
+  if (hasR2PublicDomain()) {
+    return `${publicUrl.replace(/\/$/, '')}/${key}`;
+  }
+  return getR2ProxyUrl(key);
+}
+
+/**
  * Uploads a file buffer directly to Cloudflare R2 bucket
  */
 export async function uploadToR2(
@@ -151,17 +161,35 @@ export async function uploadToR2(
 
   await client.send(command);
 
-  const fileUrl = hasR2PublicDomain()
-    ? `${publicUrl.replace(/\/$/, '')}/${key}`
-    : getR2ProxyUrl(key);
-
   return {
     key,
-    url: fileUrl,
+    url: getR2StoredUrl(key),
     bucket: bucketName,
     size: fileBuffer.byteLength,
     contentType,
   };
+}
+
+/**
+ * Generates a short-lived presigned PUT URL for direct browser uploads (bypasses Vercel body limits).
+ */
+export async function getR2PresignedUploadUrl(
+  key: string,
+  contentType: string,
+  expiresInSeconds = 600
+): Promise<string> {
+  const client = getS3Client();
+  if (!client) {
+    throw new Error('Cloudflare R2 is not configured in environment variables.');
+  }
+
+  const command = new PutObjectCommand({
+    Bucket: bucketName,
+    Key: key,
+    ContentType: contentType,
+  });
+
+  return getSignedUrl(client, command, { expiresIn: expiresInSeconds });
 }
 
 /**

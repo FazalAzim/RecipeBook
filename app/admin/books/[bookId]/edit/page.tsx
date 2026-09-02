@@ -14,6 +14,7 @@ import { Button } from '@/components/common/Button';
 import { Input } from '@/components/common/Input';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { CATEGORIES, CUISINES } from '@/components/books/BookFilters';
+import { uploadBookAsset } from '@/lib/upload-client';
 import type { Book } from '@/lib/types';
 
 export default function AdminEditBookPage({
@@ -151,44 +152,14 @@ export default function AdminEditBookPage({
       // 1. Upload replacement cover if chosen
       if (newCoverFile) {
         setUploadProgress(40);
-        const formData = new FormData();
-        formData.append('file', newCoverFile);
-        formData.append('type', 'cover');
-        formData.append('bookId', bookId);
-
-        const uploadRes = await fetch('/api/uploads', {
-          method: 'POST',
-          body: formData,
-        });
-
-        if (!uploadRes.ok) {
-          const errData = await uploadRes.json().catch(() => ({}));
-          throw new Error(errData.error || 'Cover image upload failed.');
-        }
-
-        const uploadData = await uploadRes.json();
+        const uploadData = await uploadBookAsset(newCoverFile, 'cover', bookId);
         updates.coverImageUrl = uploadData.url;
       }
 
-      // 2. Upload replacement PDF if chosen
+      // 2. Upload replacement PDF if chosen — direct to R2, bypasses Vercel 4.5 MB limit
       if (newPdfFile) {
         setUploadProgress(70);
-        const formData = new FormData();
-        formData.append('file', newPdfFile);
-        formData.append('type', 'pdf');
-        formData.append('bookId', bookId);
-
-        const uploadRes = await fetch('/api/uploads', {
-          method: 'POST',
-          body: formData,
-        });
-
-        if (!uploadRes.ok) {
-          const errData = await uploadRes.json().catch(() => ({}));
-          throw new Error(errData.error || 'PDF upload failed. Check Cloudflare R2 configuration.');
-        }
-
-        const uploadData = await uploadRes.json();
+        const uploadData = await uploadBookAsset(newPdfFile, 'pdf', bookId);
         updates.pdfFileUrl = uploadData.url;
         updates.pdfFileName = uploadData.fileName;
         updates.fileSize = uploadData.fileSize;
