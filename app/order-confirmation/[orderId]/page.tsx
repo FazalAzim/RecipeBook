@@ -61,14 +61,31 @@ export default function OrderConfirmationPage({
       if (!orderId) return;
       setLoading(true);
       setError(null);
+
+      const isPaymentSuccess =
+        searchParams.get('payment_success') === 'true' || searchParams.get('stripe_success') === 'true';
+
       try {
+        if (isPaymentSuccess && attempt === 0) {
+          await fetch('/api/lemon-squeezy/fulfill', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ paymentReferenceId: orderId }),
+          });
+        }
+
         const res = await fetch(`/api/orders/${orderId}`);
         if (!res.ok) {
-          const shouldRetry =
-            attempt < 8 &&
-            (searchParams.get('payment_success') === 'true' || searchParams.get('stripe_success') === 'true');
+          const shouldRetry = attempt < 8 && isPaymentSuccess;
 
           if (shouldRetry) {
+            if (isPaymentSuccess) {
+              await fetch('/api/lemon-squeezy/fulfill', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ paymentReferenceId: orderId }),
+              });
+            }
             await new Promise((resolve) => setTimeout(resolve, 1500));
             return fetchOrder(attempt + 1);
           }

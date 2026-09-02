@@ -4,11 +4,18 @@ import {
   parseLemonSqueezyWebhookEvent,
   verifyLemonSqueezyWebhookSignature,
 } from '@/lib/lemon-squeezy';
-import {
-  createDbOrder,
-  getDbOrderByLemonSqueezyOrderId,
-  getDbOrderByPaymentReferenceId,
-} from '@/lib/db/orders';
+import { fulfillCheckoutOrder } from '@/lib/db/fulfillment';
+
+function parseWebhookItems(customData: Record<string, string>) {
+  if (!customData.items_json) return [];
+
+  try {
+    return JSON.parse(customData.items_json) as Array<{ bookId: string; quantity: number }>;
+  } catch {
+    console.warn('Failed to parse items_json from Lemon Squeezy webhook custom_data.');
+    return [];
+  }
+}
 
 export async function POST(req: NextRequest) {
   if (!isLemonSqueezyConfigured()) {
@@ -31,48 +38,40 @@ export async function POST(req: NextRequest) {
     try {
       const lemonOrderId = event.data.id;
       const orderStatus = event.data.attributes.status;
+      const isRefunded = Boolean(event.data.attributes.refunded);
 
-      if (orderStatus && orderStatus !== 'paid') {
+      if (isRefunded || (orderStatus && orderStatus !== 'paid')) {
         return NextResponse.json({ received: true, status: 'ignored_unpaid' });
-      }
-
-      const existingOrder = await getDbOrderByLemonSqueezyOrderId(lemonOrderId);
-      if (existingOrder) {
-        console.info(`Order already processed for Lemon Squeezy order: ${lemonOrderId}`);
-        return NextResponse.json({ received: true, status: 'already_processed' });
       }
 
       const customData = event.meta.custom_data || {};
       const paymentReferenceId = customData.payment_reference_id;
-      const userId = customData.user_id || `ls_guest_${Date.now()}`;
+      const userId = customData.user_id;
       const customerName =
         customData.customer_name || event.data.attributes.user_name || 'Gourmet Customer';
       const customerEmail =
         customData.customer_email || event.data.attributes.user_email || '';
+      const items = parseWebhookItems(customData);
 
-      if (paymentReferenceId) {
-        const existingByReference = await getDbOrderByPaymentReferenceId(paymentReferenceId);
-        if (existingByReference) {
-          console.info(`Order already processed for payment reference: ${paymentReferenceId}`);
-          return NextResponse.json({ received: true, status: 'already_processed' });
-        }
+      if (!paymentReferenceId) {
+        console.warn('Lemon Squeezy webhook missing payment_reference_id in custom_data.');
+        return NextResponse.json({ received: true, status: 'missing_reference' });
       }
 
-      const items: Array<{ bookId: string; quantity: number }> = customData.items_json
-        ? JSON.parse(customData.items_json)
-        : [];
+      const order = await fulfillCheckoutOrder({
+        paymentReferenceId,
+        lemonSqueezyOrderId: lemonOrderId,
+        userId,
+        customerName,
+        customerEmail,
+        items: items.length > 0 ? items : undefined,
+        verifyPayment: false,
+      });
 
-      if (items.length > 0 && customerEmail) {
-        await createDbOrder({
-          userId,
-          customerName,
-          customerEmail,
-          cartItems: items,
-          paymentMethod: 'lemon_squeezy',
-          paymentReferenceId,
-          lemonSqueezyOrderId: lemonOrderId,
-        });
-        console.info(`✅ Successfully fulfilled Lemon Squeezy order for ${customerEmail}`);
+      if (order) {
+        console.info(`✅ Successfully fulfilled Lemon Squeezy order for ${order.customerEmail}`);
+      } else {
+        console.warn(`⚠️ Could not fulfill Lemon Squeezy order for reference: ${paymentReferenceId}`);
       }
     } catch (orderErr) {
       console.error('❌ Error processing Lemon Squeezy order fulfillment:', orderErr);

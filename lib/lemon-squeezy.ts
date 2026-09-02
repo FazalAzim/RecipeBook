@@ -216,8 +216,73 @@ export interface LemonSqueezyWebhookEvent {
       user_name?: string;
       user_email?: string;
       identifier?: string;
+      subtotal?: number;
+      subtotal_usd?: number;
+      total?: number;
+      total_usd?: number;
+      refunded?: boolean | null;
+      created_at?: string;
     };
   };
+}
+
+interface LemonSqueezyOrdersListResponse {
+  data: Array<{
+    id: string;
+    attributes: {
+      status: string;
+      user_email: string;
+      subtotal: number;
+      subtotal_usd: number;
+      total: number;
+      total_usd: number;
+      refunded: boolean | null;
+      created_at: string;
+    };
+  }>;
+}
+
+/**
+ * Finds a recently paid Lemon Squeezy order matching email + cart subtotal.
+ * Used to fulfill orders when webhooks cannot reach local/dev environments.
+ */
+export async function findVerifiedLemonSqueezyOrder(
+  customerEmail: string,
+  expectedSubtotalCents: number,
+  createdAfter: Date
+): Promise<{ orderId: string } | null> {
+  const { storeId } = getRequiredConfig();
+  const normalizedEmail = customerEmail.trim().toLowerCase();
+
+  const endpoints = [
+    `/orders?filter[store_id]=${storeId}&filter[user_email]=${encodeURIComponent(normalizedEmail)}&page[size]=15`,
+    `/orders?filter[store_id]=${storeId}&page[size]=25`,
+  ];
+
+  for (const endpoint of endpoints) {
+    try {
+      const response = await lemonSqueezyRequest<LemonSqueezyOrdersListResponse>(endpoint);
+      const match = (response.data || []).find((order) => {
+        const attrs = order.attributes;
+        if (!attrs || attrs.status !== 'paid' || attrs.refunded) return false;
+        if ((attrs.user_email || '').toLowerCase() !== normalizedEmail) return false;
+
+        const orderCreatedAt = new Date(attrs.created_at);
+        if (Number.isNaN(orderCreatedAt.getTime()) || orderCreatedAt < createdAfter) return false;
+
+        const subtotalCents = Number(attrs.subtotal_usd ?? attrs.subtotal ?? 0);
+        return subtotalCents === expectedSubtotalCents;
+      });
+
+      if (match) {
+        return { orderId: match.id };
+      }
+    } catch (err) {
+      console.warn('Lemon Squeezy order lookup failed:', err);
+    }
+  }
+
+  return null;
 }
 
 /**

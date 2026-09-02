@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDbBookById } from '@/lib/db/books';
+import { savePendingCheckout } from '@/lib/db/pending-checkouts';
 import {
   createLemonSqueezyCheckout,
   createPaymentReferenceId,
@@ -63,6 +64,11 @@ export async function POST(req: NextRequest) {
     const successUrl = `${origin}/order-confirmation/${paymentReferenceId}?payment_success=true`;
     const cancelUrl = `${origin}/checkout?canceled=true`;
 
+    const totalCents = verifiedLineItems.reduce(
+      (sum, item) => sum + Math.round(item.unitPrice * 100) * Math.max(1, Math.floor(item.quantity)),
+      0
+    );
+
     const checkout = await createLemonSqueezyCheckout({
       paymentReferenceId,
       userId,
@@ -71,6 +77,19 @@ export async function POST(req: NextRequest) {
       items: verifiedLineItems,
       successUrl,
       cancelUrl,
+    });
+
+    await savePendingCheckout({
+      paymentReferenceId,
+      userId,
+      customerName: name,
+      customerEmail: customerEmail.trim().toLowerCase(),
+      items: verifiedLineItems.map((item) => ({
+        bookId: item.bookId,
+        quantity: Math.max(1, Math.floor(item.quantity)),
+      })),
+      totalCents,
+      lemonSqueezyCheckoutId: checkout.checkoutId,
     });
 
     return NextResponse.json({
