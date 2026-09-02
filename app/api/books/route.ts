@@ -49,7 +49,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const newBook = await createDbBook({
+    const requestedId =
+      typeof bookData.id === 'string' && /^book-[a-zA-Z0-9_-]+$/.test(bookData.id.trim())
+        ? bookData.id.trim()
+        : undefined;
+
+    const newBook = await createDbBook(
+      {
       title: bookData.title.trim(),
       author: bookData.author.trim(),
       description: bookData.description || '',
@@ -64,7 +70,9 @@ export async function POST(req: NextRequest) {
       pageCount: Number(bookData.pageCount || 100),
       isPublished: Boolean(bookData.isPublished ?? true),
       featured: Boolean(bookData.featured ?? false),
-    });
+      },
+      requestedId ? { bookId: requestedId } : undefined
+    );
 
     return NextResponse.json({ book: newBook }, { status: 201 });
   } catch (error: any) {

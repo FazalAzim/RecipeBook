@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { isDbBookPurchased, recordDbDownload, getDbUserLibrary } from '@/lib/db/library';
+import { isDbBookPurchased, recordDbDownload } from '@/lib/db/library';
 import { getDbBookById } from '@/lib/db/books';
 import { getSessionUser } from '@/lib/auth';
-import { getR2PresignedDownloadUrl, isR2Configured, extractR2KeyFromStoredValue } from '@/lib/r2';
+import {
+  getR2Object,
+  getR2PresignedDownloadUrl,
+  isR2Configured,
+  resolvePdfStorageKey,
+} from '@/lib/r2';
 
 function generateSamplePdfBuffer(title: string, author: string): Buffer {
   const content = `%PDF-1.4
@@ -79,6 +84,25 @@ startxref
   return Buffer.from(content, 'utf-8');
 }
 
+async function streamPdfFromR2(key: string, fileName: string): Promise<NextResponse> {
+  const object = await getR2Object(key);
+  if (!object.Body) {
+    throw new Error('PDF file is empty in storage.');
+  }
+
+  const bytes = await object.Body.transformToByteArray();
+
+  return new NextResponse(Buffer.from(bytes), {
+    status: 200,
+    headers: {
+      'Content-Type': (object.ContentType as string) || 'application/pdf',
+      'Content-Disposition': `attachment; filename="${encodeURIComponent(fileName)}"`,
+      'Content-Length': String(bytes.byteLength),
+      'Cache-Control': 'no-store, no-cache, must-revalidate',
+    },
+  });
+}
+
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ bookId: string }> }
@@ -99,7 +123,21 @@ export async function GET(
       return NextResponse.json({ error: 'Recipe book not found.' }, { status: 404 });
     }
 
-    // Authorization verification
+    // Preview placeholder only — never for real purchases.
+    if (directSample && isAdmin) {
+      const fileName = book.pdfFileName || `${book.title.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
+      const pdfBuffer = generateSamplePdfBuffer(book.title, book.author);
+      return new NextResponse(new Uint8Array(pdfBuffer), {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/pdf',
+          'Content-Disposition': `attachment; filename="${encodeURIComponent(fileName)}"`,
+          'Content-Length': pdfBuffer.byteLength.toString(),
+          'Cache-Control': 'no-store, no-cache, must-revalidate',
+        },
+      });
+    }
+
     let isAuthorized = isAdmin;
 
     if (!isAuthorized && (userId || userEmail)) {
@@ -115,42 +153,43 @@ export async function GET(
       );
     }
 
-    // Record download telemetry
     const identifier = userId || userEmail || 'verified_customer';
     await recordDbDownload(identifier, bookId);
 
     const fileName = book.pdfFileName || `${book.title.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
 
-    // 1. If stored in Cloudflare R2, generate a signed download URL or stream
-    if (isR2Configured() && book.pdfFileUrl && !book.pdfFileUrl.startsWith('data:') && !directSample) {
-      try {
-        const key =
-          extractR2KeyFromStoredValue(book.pdfFileUrl) || `pdfs/${book.id}/${book.pdfFileName}`;
-
-        const signedUrl = await getR2PresignedDownloadUrl(key, 300);
-        return NextResponse.redirect(signedUrl);
-      } catch (r2Err) {
-        console.warn('R2 presigned URL generation failed, falling back to sample stream:', r2Err);
-      }
+    if (!isR2Configured()) {
+      return NextResponse.json(
+        {
+          error:
+            'PDF storage is not configured on this server. Please contact support or re-upload the cookbook PDF from the admin panel after storage is configured.',
+        },
+        { status: 503 }
+      );
     }
 
-    // 2. Stream authentic PDF binary response
-    const pdfBuffer = generateSamplePdfBuffer(book.title, book.author);
+    const storageKey = await resolvePdfStorageKey(book.id, book.pdfFileUrl, book.pdfFileName);
+    if (!storageKey) {
+      return NextResponse.json(
+        {
+          error:
+            'The cookbook PDF was not found in storage. Please re-upload the PDF from Admin → Edit Book.',
+        },
+        { status: 404 }
+      );
+    }
 
-    return new NextResponse(new Uint8Array(pdfBuffer), {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="${encodeURIComponent(fileName)}"`,
-        'Content-Length': pdfBuffer.byteLength.toString(),
-        'Cache-Control': 'no-store, no-cache, must-revalidate',
-      },
-    });
-  } catch (error: any) {
+    // Presigned redirect handles large files without serverless response-size limits.
+    try {
+      const signedUrl = await getR2PresignedDownloadUrl(storageKey, 300);
+      return NextResponse.redirect(signedUrl);
+    } catch (presignErr) {
+      console.warn('R2 presigned URL failed, streaming PDF directly:', presignErr);
+      return streamPdfFromR2(storageKey, fileName);
+    }
+  } catch (error: unknown) {
     console.error('Download error:', error);
-    return NextResponse.json(
-      { error: error.message || 'Error processing book download.' },
-      { status: 500 }
-    );
+    const message = error instanceof Error ? error.message : 'Error processing book download.';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

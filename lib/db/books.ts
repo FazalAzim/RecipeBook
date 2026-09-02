@@ -121,8 +121,11 @@ export async function getDbBookById(bookId: string): Promise<Book | null> {
   return inMemoryBooks.find((b) => b.id === bookId) || null;
 }
 
-export async function createDbBook(bookData: Omit<Book, 'id' | 'createdAt' | 'updatedAt' | 'salesCount'>): Promise<Book> {
-  const bookId = `book-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
+export async function createDbBook(
+  bookData: Omit<Book, 'id' | 'createdAt' | 'updatedAt' | 'salesCount'>,
+  options?: { bookId?: string }
+): Promise<Book> {
+  const bookId = options?.bookId || `book-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
   const now = new Date();
 
   const newBook: Book = {

@@ -43,6 +43,9 @@ export default function AdminNewBookPage() {
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [draftBookId] = useState(
+    () => `book-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`
+  );
 
   const handleCoverSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -106,6 +109,7 @@ export default function AdminNewBookPage() {
     if (!description.trim()) errors.description = 'Cookbook description is required.';
     if (!price || isNaN(Number(price)) || Number(price) <= 0) errors.price = 'Please enter a valid price.';
     if (!pageCount || isNaN(Number(pageCount)) || Number(pageCount) < 1) errors.pageCount = 'Page count must be >= 1.';
+    if (!pdfFile) errors.pdf = 'A cookbook PDF is required before publishing.';
 
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
@@ -119,8 +123,8 @@ export default function AdminNewBookPage() {
     try {
       let coverImageUrl = coverPreview || 'https://images.unsplash.com/photo-1495521821757-a1efb6729352?auto=format&fit=crop&w=800&q=80';
       let pdfFileUrl = '';
-      let pdfFileName = pdfFile ? pdfFile.name : `${title.replace(/\s+/g, '_')}.pdf`;
-      let fileSize = pdfFile ? `${(pdfFile.size / (1024 * 1024)).toFixed(1)} MB` : '4.5 MB';
+      let pdfFileName = pdfFile!.name;
+      let fileSize = `${(pdfFile!.size / (1024 * 1024)).toFixed(1)} MB`;
 
       // 1. Upload cover image if provided
       if (coverFile) {
@@ -128,37 +132,43 @@ export default function AdminNewBookPage() {
         const formData = new FormData();
         formData.append('file', coverFile);
         formData.append('type', 'cover');
+        formData.append('bookId', draftBookId);
 
         const uploadRes = await fetch('/api/uploads', {
           method: 'POST',
           body: formData,
         });
 
-        if (uploadRes.ok) {
-          const uploadData = await uploadRes.json();
-          coverImageUrl = uploadData.url;
+        if (!uploadRes.ok) {
+          const errData = await uploadRes.json().catch(() => ({}));
+          throw new Error(errData.error || 'Cover image upload failed.');
         }
+
+        const uploadData = await uploadRes.json();
+        coverImageUrl = uploadData.url;
       }
 
-      // 2. Upload PDF document if provided
-      if (pdfFile) {
-        setUploadProgress(60);
-        const formData = new FormData();
-        formData.append('file', pdfFile);
-        formData.append('type', 'pdf');
+      // 2. Upload PDF document (required)
+      setUploadProgress(60);
+      const pdfFormData = new FormData();
+      pdfFormData.append('file', pdfFile!);
+      pdfFormData.append('type', 'pdf');
+      pdfFormData.append('bookId', draftBookId);
 
-        const uploadRes = await fetch('/api/uploads', {
-          method: 'POST',
-          body: formData,
-        });
+      const uploadRes = await fetch('/api/uploads', {
+        method: 'POST',
+        body: pdfFormData,
+      });
 
-        if (uploadRes.ok) {
-          const uploadData = await uploadRes.json();
-          pdfFileUrl = uploadData.url;
-          pdfFileName = uploadData.fileName;
-          fileSize = uploadData.fileSize;
-        }
+      if (!uploadRes.ok) {
+        const errData = await uploadRes.json().catch(() => ({}));
+        throw new Error(errData.error || 'PDF upload failed. Check Cloudflare R2 configuration.');
       }
+
+      const uploadData = await uploadRes.json();
+      pdfFileUrl = uploadData.url;
+      pdfFileName = uploadData.fileName;
+      fileSize = uploadData.fileSize;
 
       setUploadProgress(85);
 
@@ -172,6 +182,7 @@ export default function AdminNewBookPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          id: draftBookId,
           title,
           author,
           description,

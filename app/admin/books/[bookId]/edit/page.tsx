@@ -161,10 +161,13 @@ export default function AdminEditBookPage({
           body: formData,
         });
 
-        if (uploadRes.ok) {
-          const uploadData = await uploadRes.json();
-          updates.coverImageUrl = uploadData.url;
+        if (!uploadRes.ok) {
+          const errData = await uploadRes.json().catch(() => ({}));
+          throw new Error(errData.error || 'Cover image upload failed.');
         }
+
+        const uploadData = await uploadRes.json();
+        updates.coverImageUrl = uploadData.url;
       }
 
       // 2. Upload replacement PDF if chosen
@@ -180,12 +183,15 @@ export default function AdminEditBookPage({
           body: formData,
         });
 
-        if (uploadRes.ok) {
-          const uploadData = await uploadRes.json();
-          updates.pdfFileUrl = uploadData.url;
-          updates.pdfFileName = uploadData.fileName;
-          updates.fileSize = uploadData.fileSize;
+        if (!uploadRes.ok) {
+          const errData = await uploadRes.json().catch(() => ({}));
+          throw new Error(errData.error || 'PDF upload failed. Check Cloudflare R2 configuration.');
         }
+
+        const uploadData = await uploadRes.json();
+        updates.pdfFileUrl = uploadData.url;
+        updates.pdfFileName = uploadData.fileName;
+        updates.fileSize = uploadData.fileSize;
       }
 
       setUploadProgress(90);

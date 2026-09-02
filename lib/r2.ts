@@ -4,6 +4,7 @@ import {
   GetObjectCommand,
   DeleteObjectCommand,
   HeadObjectCommand,
+  ListObjectsV2Command,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
@@ -237,4 +238,58 @@ export async function checkFileExistsInR2(key: string): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+export async function listR2KeysWithPrefix(prefix: string): Promise<string[]> {
+  const client = getS3Client();
+  if (!client) return [];
+
+  const command = new ListObjectsV2Command({
+    Bucket: bucketName,
+    Prefix: prefix,
+  });
+
+  const response = await client.send(command);
+  return (response.Contents || [])
+    .map((item) => item.Key)
+    .filter((key): key is string => Boolean(key));
+}
+
+/**
+ * Resolves the R2 object key for a cookbook PDF, including legacy uploads
+ * that used a different bookId prefix than the final MongoDB record.
+ */
+export async function resolvePdfStorageKey(
+  bookId: string,
+  storedPdfFileUrl: string,
+  pdfFileName?: string
+): Promise<string | null> {
+  const candidates: string[] = [];
+
+  const fromUrl = extractR2KeyFromStoredValue(storedPdfFileUrl);
+  if (fromUrl?.startsWith('pdfs/')) {
+    candidates.push(fromUrl);
+  }
+
+  if (storedPdfFileUrl.trim().startsWith('pdfs/')) {
+    candidates.push(storedPdfFileUrl.trim());
+  }
+
+  if (pdfFileName) {
+    candidates.push(`pdfs/${bookId}/${pdfFileName}`);
+  }
+
+  const prefixKeys = await listR2KeysWithPrefix(`pdfs/${bookId}/`);
+  candidates.push(...prefixKeys.sort().reverse());
+
+  const seen = new Set<string>();
+  for (const key of candidates) {
+    if (!key.startsWith('pdfs/') || seen.has(key)) continue;
+    seen.add(key);
+    if (await checkFileExistsInR2(key)) {
+      return key;
+    }
+  }
+
+  return null;
 }

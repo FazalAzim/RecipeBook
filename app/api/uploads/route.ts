@@ -73,23 +73,23 @@ export async function POST(req: NextRequest) {
       const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);
 
-      if (isR2Configured()) {
-        const uploadResult = await uploadToR2(buffer, key, 'application/pdf');
-        return NextResponse.json({
-          url: uploadResult.url,
-          key: uploadResult.key,
-          fileName: file.name,
-          fileSize: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
-        });
-      } else {
-        return NextResponse.json({
-          url: `/api/download/${bookId}?sample=true`,
-          key,
-          fileName: file.name,
-          fileSize: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
-          notice: 'Saved locally (Cloudflare R2 credentials not set in .env.local)',
-        });
+      if (!isR2Configured()) {
+        return NextResponse.json(
+          {
+            error:
+              'Cloudflare R2 storage is not configured. Set CLOUDFLARE_R2_* environment variables before uploading PDFs.',
+          },
+          { status: 503 }
+        );
       }
+
+      const uploadResult = await uploadToR2(buffer, key, 'application/pdf');
+      return NextResponse.json({
+        url: uploadResult.url,
+        key: uploadResult.key,
+        fileName: file.name,
+        fileSize: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
+      });
     } else {
       return NextResponse.json({ error: 'Invalid upload type specified.' }, { status: 400 });
     }
