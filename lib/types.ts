@@ -56,7 +56,13 @@ export interface OrderItem {
   pdfFileUrl?: string;
 }
 
-export type PaymentMethod = 'stripe' | 'credit_card' | 'paypal' | 'apple_pay' | 'google_pay';
+export type PaymentMethod =
+  | 'lemon_squeezy'
+  | 'stripe'
+  | 'credit_card'
+  | 'paypal'
+  | 'apple_pay'
+  | 'google_pay';
 export type PaymentStatus = 'paid' | 'pending' | 'failed';
 export type OrderStatus = 'completed' | 'processing' | 'cancelled';
 
@@ -71,6 +77,13 @@ export interface Order {
   paymentMethod: PaymentMethod;
   paymentStatus: PaymentStatus;
   orderStatus: OrderStatus;
+  /** Client redirect reference generated before checkout (Lemon Squeezy). */
+  paymentReferenceId?: string;
+  /** Lemon Squeezy order id from webhook (idempotency key). */
+  lemonSqueezyOrderId?: string;
+  /** Lemon Squeezy checkout id from API response. */
+  lemonSqueezyCheckoutId?: string;
+  /** Legacy Stripe fields (existing orders only). */
   stripeSessionId?: string;
   stripePaymentIntentId?: string;
   createdAt: string | Date;

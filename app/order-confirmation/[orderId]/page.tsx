@@ -38,7 +38,7 @@ export default function OrderConfirmationPage({
   const [downloadingBookId, setDownloadingBookId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (searchParams.get('stripe_success') === 'true') {
+    if (searchParams.get('payment_success') === 'true' || searchParams.get('stripe_success') === 'true') {
       clearCart();
       sessionStorage.removeItem('recipebooks_checkout_customer');
     }
@@ -57,13 +57,22 @@ export default function OrderConfirmationPage({
       // Confetti safely ignored if not supported
     }
 
-    const fetchOrder = async () => {
+    const fetchOrder = async (attempt = 0) => {
       if (!orderId) return;
       setLoading(true);
       setError(null);
       try {
         const res = await fetch(`/api/orders/${orderId}`);
         if (!res.ok) {
+          const shouldRetry =
+            attempt < 8 &&
+            (searchParams.get('payment_success') === 'true' || searchParams.get('stripe_success') === 'true');
+
+          if (shouldRetry) {
+            await new Promise((resolve) => setTimeout(resolve, 1500));
+            return fetchOrder(attempt + 1);
+          }
+
           throw new Error('Order details could not be found.');
         }
         const data = await res.json();
@@ -76,7 +85,7 @@ export default function OrderConfirmationPage({
     };
 
     fetchOrder();
-  }, [orderId]);
+  }, [orderId, searchParams]);
 
   const handleDownload = async (bookId: string, title: string) => {
     setDownloadingBookId(bookId);

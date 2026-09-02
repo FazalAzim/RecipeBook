@@ -34,7 +34,7 @@ export default function PaymentPage() {
     }
   }, [items, router]);
 
-  const handleStripeCheckout = async () => {
+  const handleLemonSqueezyCheckout = async () => {
     setErrorMessage(null);
     if (!customerInfo?.email) {
       setErrorMessage('Missing customer billing email. Please return to Checkout.');
@@ -43,7 +43,7 @@ export default function PaymentPage() {
 
     setIsProcessing(true);
     try {
-      const res = await fetch('/api/stripe/checkout-session', {
+      const res = await fetch('/api/lemon-squeezy/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -58,7 +58,7 @@ export default function PaymentPage() {
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || 'Failed to initialize Stripe checkout session.');
+        throw new Error(data.error || 'Failed to initialize Lemon Squeezy checkout.');
       }
 
       if (data.url) {
@@ -67,8 +67,9 @@ export default function PaymentPage() {
         throw new Error('No checkout URL returned by payment gateway.');
       }
     } catch (err: unknown) {
-      console.error('Stripe redirect error:', err);
-      const message = err instanceof Error ? err.message : 'Stripe payment initialization failed.';
+      console.error('Lemon Squeezy redirect error:', err);
+      const message =
+        err instanceof Error ? err.message : 'Lemon Squeezy payment initialization failed.';
       setErrorMessage(message);
       setIsProcessing(false);
     }
@@ -146,7 +147,7 @@ export default function PaymentPage() {
               <ShieldCheck size={22} color="var(--primary)" />
               <div>
                 <div style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--primary-dark)' }}>
-                  Stripe Secure Checkout
+                  Lemon Squeezy Secure Checkout
                 </div>
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
                   Pay with credit card, debit card, Apple Pay, or Google Pay
@@ -155,7 +156,7 @@ export default function PaymentPage() {
             </div>
 
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.9375rem', marginBottom: '1.5rem', lineHeight: 1.6 }}>
-              You will be redirected to Stripe&apos;s encrypted checkout page to complete your payment securely.
+              You will be redirected to Lemon Squeezy&apos;s encrypted checkout page to complete your payment securely.
               Your recipe books will be available for download immediately after payment is confirmed.
             </p>
 
@@ -173,7 +174,7 @@ export default function PaymentPage() {
               }}
             >
               <Lock size={16} color="var(--accent-olive)" />
-              <span>Payments are processed by Stripe. Card details are never stored on our servers.</span>
+              <span>Payments are processed by Lemon Squeezy. Card details are never stored on our servers.</span>
             </div>
 
             <Button
@@ -182,9 +183,9 @@ export default function PaymentPage() {
               fullWidth
               isLoading={isProcessing}
               rightIcon={<ExternalLink size={18} />}
-              onClick={handleStripeCheckout}
+              onClick={handleLemonSqueezyCheckout}
             >
-              Pay ${total.toFixed(2)} with Stripe
+              Pay ${total.toFixed(2)} Securely
             </Button>
           </div>
 

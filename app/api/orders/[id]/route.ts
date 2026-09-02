@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDbOrderById, getDbOrderByStripeSessionId } from '@/lib/db/orders';
+import { getDbOrderById, getDbOrderByExternalPaymentId } from '@/lib/db/orders';
 
 export async function GET(
   _req: NextRequest,
@@ -9,9 +9,8 @@ export async function GET(
     const { id } = await params;
     let order = await getDbOrderById(id);
 
-    // If not found by ORD id, check if id is a Stripe checkout session id
-    if (!order && id.startsWith('cs_')) {
-      order = await getDbOrderByStripeSessionId(id);
+    if (!order) {
+      order = await getDbOrderByExternalPaymentId(id);
     }
 
     if (!order) {

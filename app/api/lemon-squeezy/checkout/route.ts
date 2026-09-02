@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDbBookById } from '@/lib/db/books';
-import { createStripeCheckoutSession, isStripeConfigured, LineItemDetail } from '@/lib/stripe';
+import {
+  createLemonSqueezyCheckout,
+  createPaymentReferenceId,
+  isLemonSqueezyConfigured,
+  type LineItemDetail,
+} from '@/lib/lemon-squeezy';
 import { getSessionUser } from '@/lib/auth';
 
 export async function POST(req: NextRequest) {
@@ -21,7 +26,6 @@ export async function POST(req: NextRequest) {
     const name = customerName || sessionUser?.name || 'Gourmet Customer';
     const origin = req.headers.get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
-    // Step 1: Server-side price recalculation (Never trust prices sent from client)
     const verifiedLineItems: LineItemDetail[] = [];
 
     for (const item of items) {
@@ -44,20 +48,23 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const successUrl = `${origin}/order-confirmation/{CHECKOUT_SESSION_ID}?stripe_success=true`;
-    const cancelUrl = `${origin}/checkout?canceled=true`;
-
-    if (!isStripeConfigured()) {
+    if (!isLemonSqueezyConfigured()) {
       return NextResponse.json(
         {
-          error: 'Stripe is not configured. Please configure STRIPE_SECRET_KEY in your environment, or use Direct Card Checkout.',
-          isStripeConfigured: false,
+          error:
+            'Lemon Squeezy is not configured. Please set LEMON_SQUEEZY_API_KEY, LEMON_SQUEEZY_STORE_ID, and LEMON_SQUEEZY_VARIANT_ID.',
+          isLemonSqueezyConfigured: false,
         },
         { status: 503 }
       );
     }
 
-    const session = await createStripeCheckoutSession({
+    const paymentReferenceId = createPaymentReferenceId();
+    const successUrl = `${origin}/order-confirmation/${paymentReferenceId}?payment_success=true`;
+    const cancelUrl = `${origin}/checkout?canceled=true`;
+
+    const checkout = await createLemonSqueezyCheckout({
+      paymentReferenceId,
       userId,
       customerName: name,
       customerEmail: customerEmail.trim().toLowerCase(),
@@ -66,11 +73,15 @@ export async function POST(req: NextRequest) {
       cancelUrl,
     });
 
-    return NextResponse.json({ sessionId: session.sessionId, url: session.url });
+    return NextResponse.json({
+      checkoutId: checkout.checkoutId,
+      paymentReferenceId: checkout.paymentReferenceId,
+      url: checkout.url,
+    });
   } catch (error: any) {
-    console.error('Stripe checkout session error:', error);
+    console.error('Lemon Squeezy checkout error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to initialize Stripe checkout session.' },
+      { error: error.message || 'Failed to initialize Lemon Squeezy checkout.' },
       { status: 500 }
     );
   }

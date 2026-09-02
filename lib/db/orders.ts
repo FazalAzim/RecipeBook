@@ -5,22 +5,71 @@ import type { CartItem, Order, OrderItem, PaymentMethod } from '../types';
 
 let inMemoryOrders: Order[] = [];
 
+function mapOrderDoc(doc: Record<string, unknown>): Order {
+  return {
+    id: (doc.id || (doc._id as { toString(): string }).toString()) as string,
+    userId: doc.userId as string,
+    customerName: doc.customerName as string,
+    customerEmail: doc.customerEmail as string,
+    items: doc.items as OrderItem[],
+    subtotal: Number(doc.subtotal),
+    total: Number(doc.total),
+    paymentMethod: doc.paymentMethod as PaymentMethod,
+    paymentStatus: doc.paymentStatus as Order['paymentStatus'],
+    orderStatus: doc.orderStatus as Order['orderStatus'],
+    paymentReferenceId: doc.paymentReferenceId as string | undefined,
+    lemonSqueezyOrderId: doc.lemonSqueezyOrderId as string | undefined,
+    lemonSqueezyCheckoutId: doc.lemonSqueezyCheckoutId as string | undefined,
+    stripeSessionId: doc.stripeSessionId as string | undefined,
+    stripePaymentIntentId: doc.stripePaymentIntentId as string | undefined,
+    createdAt: doc.createdAt ? new Date(doc.createdAt as string).toISOString() : new Date().toISOString(),
+  };
+}
+
 export async function createDbOrder(params: {
   userId: string;
   customerName: string;
   customerEmail: string;
   cartItems: CartItem[] | { bookId: string; quantity: number }[];
   paymentMethod: PaymentMethod;
+  paymentReferenceId?: string;
+  lemonSqueezyOrderId?: string;
+  lemonSqueezyCheckoutId?: string;
   stripeSessionId?: string;
   stripePaymentIntentId?: string;
 }): Promise<Order> {
-  const { userId, customerName, customerEmail, cartItems, paymentMethod, stripeSessionId, stripePaymentIntentId } = params;
+  const {
+    userId,
+    customerName,
+    customerEmail,
+    cartItems,
+    paymentMethod,
+    paymentReferenceId,
+    lemonSqueezyOrderId,
+    lemonSqueezyCheckoutId,
+    stripeSessionId,
+    stripePaymentIntentId,
+  } = params;
 
   if (!cartItems || cartItems.length === 0) {
     throw new Error('Order items cannot be empty.');
   }
 
-  // Idempotency check for Stripe webhooks
+  // Idempotency checks for payment webhooks
+  if (lemonSqueezyOrderId) {
+    const existing = await getDbOrderByLemonSqueezyOrderId(lemonSqueezyOrderId);
+    if (existing) {
+      return existing;
+    }
+  }
+
+  if (paymentReferenceId) {
+    const existing = await getDbOrderByPaymentReferenceId(paymentReferenceId);
+    if (existing) {
+      return existing;
+    }
+  }
+
   if (stripeSessionId) {
     const existing = await getDbOrderByStripeSessionId(stripeSessionId);
     if (existing) {
@@ -75,6 +124,9 @@ export async function createDbOrder(params: {
     paymentMethod,
     paymentStatus: 'paid',
     orderStatus: 'completed',
+    paymentReferenceId,
+    lemonSqueezyOrderId,
+    lemonSqueezyCheckoutId,
     stripeSessionId,
     stripePaymentIntentId,
     createdAt: now.toISOString(),
@@ -127,21 +179,7 @@ export async function getDbOrders(userId?: string, email?: string): Promise<Orde
         .sort({ createdAt: -1 })
         .toArray();
 
-      return docs.map((d) => ({
-        id: (d.id || d._id.toString()) as string,
-        userId: d.userId as string,
-        customerName: d.customerName as string,
-        customerEmail: d.customerEmail as string,
-        items: d.items as OrderItem[],
-        subtotal: Number(d.subtotal),
-        total: Number(d.total),
-        paymentMethod: d.paymentMethod as PaymentMethod,
-        paymentStatus: d.paymentStatus as any,
-        orderStatus: d.orderStatus as any,
-        stripeSessionId: d.stripeSessionId as string,
-        stripePaymentIntentId: d.stripePaymentIntentId as string,
-        createdAt: d.createdAt ? new Date(d.createdAt).toISOString() : new Date().toISOString(),
-      }));
+      return docs.map((d) => mapOrderDoc(d as Record<string, unknown>));
     } catch (err) {
       console.warn('Error querying MongoDB orders:', err);
     }
@@ -164,21 +202,7 @@ export async function getDbOrderById(orderId: string): Promise<Order | null> {
         $or: [{ id: orderId }, { _id: (orderId.length === 24 ? { $oid: orderId } : undefined) as any }],
       });
       if (doc) {
-        return {
-          id: (doc.id || doc._id.toString()) as string,
-          userId: doc.userId as string,
-          customerName: doc.customerName as string,
-          customerEmail: doc.customerEmail as string,
-          items: doc.items as OrderItem[],
-          subtotal: Number(doc.subtotal),
-          total: Number(doc.total),
-          paymentMethod: doc.paymentMethod as PaymentMethod,
-          paymentStatus: doc.paymentStatus as any,
-          orderStatus: doc.orderStatus as any,
-          stripeSessionId: doc.stripeSessionId as string,
-          stripePaymentIntentId: doc.stripePaymentIntentId as string,
-          createdAt: doc.createdAt ? new Date(doc.createdAt).toISOString() : new Date().toISOString(),
-        };
+        return mapOrderDoc(doc as Record<string, unknown>);
       }
     } catch (err) {
       console.warn('Error querying MongoDB order by ID:', err);
@@ -188,27 +212,60 @@ export async function getDbOrderById(orderId: string): Promise<Order | null> {
   return inMemoryOrders.find((o) => o.id === orderId) || null;
 }
 
+export async function getDbOrderByPaymentReferenceId(referenceId: string): Promise<Order | null> {
+  const db = await getDb();
+  if (db && isMongoConfigured()) {
+    try {
+      const doc = await db.collection('orders').findOne({ paymentReferenceId: referenceId });
+      if (doc) {
+        return mapOrderDoc(doc as Record<string, unknown>);
+      }
+    } catch (err) {
+      console.warn('Error finding order by payment reference ID:', err);
+    }
+  }
+
+  return inMemoryOrders.find((o) => o.paymentReferenceId === referenceId) || null;
+}
+
+export async function getDbOrderByLemonSqueezyOrderId(orderId: string): Promise<Order | null> {
+  const db = await getDb();
+  if (db && isMongoConfigured()) {
+    try {
+      const doc = await db.collection('orders').findOne({ lemonSqueezyOrderId: orderId });
+      if (doc) {
+        return mapOrderDoc(doc as Record<string, unknown>);
+      }
+    } catch (err) {
+      console.warn('Error finding order by Lemon Squeezy order ID:', err);
+    }
+  }
+
+  return inMemoryOrders.find((o) => o.lemonSqueezyOrderId === orderId) || null;
+}
+
+/** Lookup by external payment reference (Lemon Squeezy reference, LS order id, or legacy Stripe session). */
+export async function getDbOrderByExternalPaymentId(externalId: string): Promise<Order | null> {
+  const byReference = await getDbOrderByPaymentReferenceId(externalId);
+  if (byReference) return byReference;
+
+  const byLemonOrder = await getDbOrderByLemonSqueezyOrderId(externalId);
+  if (byLemonOrder) return byLemonOrder;
+
+  if (externalId.startsWith('cs_')) {
+    return getDbOrderByStripeSessionId(externalId);
+  }
+
+  return null;
+}
+
 export async function getDbOrderByStripeSessionId(sessionId: string): Promise<Order | null> {
   const db = await getDb();
   if (db && isMongoConfigured()) {
     try {
       const doc = await db.collection('orders').findOne({ stripeSessionId: sessionId });
       if (doc) {
-        return {
-          id: (doc.id || doc._id.toString()) as string,
-          userId: doc.userId as string,
-          customerName: doc.customerName as string,
-          customerEmail: doc.customerEmail as string,
-          items: doc.items as OrderItem[],
-          subtotal: Number(doc.subtotal),
-          total: Number(doc.total),
-          paymentMethod: doc.paymentMethod as PaymentMethod,
-          paymentStatus: doc.paymentStatus as any,
-          orderStatus: doc.orderStatus as any,
-          stripeSessionId: doc.stripeSessionId as string,
-          stripePaymentIntentId: doc.stripePaymentIntentId as string,
-          createdAt: doc.createdAt ? new Date(doc.createdAt).toISOString() : new Date().toISOString(),
-        };
+        return mapOrderDoc(doc as Record<string, unknown>);
       }
     } catch (err) {
       console.warn('Error finding order by Stripe session ID:', err);

@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
 export async function POST() {
   return NextResponse.json(
     {
-      error: 'Direct order creation is disabled. Complete payment through Stripe Checkout.',
+      error: 'Direct order creation is disabled. Complete payment through Lemon Squeezy Checkout.',
     },
     { status: 403 }
   );
