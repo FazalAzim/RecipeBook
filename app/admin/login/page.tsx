@@ -98,7 +98,7 @@ function AdminLoginForm() {
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="admin@recipebooks.com"
+          placeholder="admin@example.com"
           leftIcon={<Mail size={18} />}
         />
 
