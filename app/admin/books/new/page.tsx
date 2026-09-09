@@ -93,8 +93,8 @@ export default function AdminNewBookPage() {
     setCategory('Desserts & Baking');
     setCuisine('French');
     setTagsInput('Chocolate, Mousse, Baking, Patisserie, Cakes');
-    setPrice('19.99');
-    setPageCount('111');
+    setPrice('21.99');
+    setPageCount('156');
     setCoverPreview('/books/chocolate-mousse-cake-cover.png');
     setIsPublished(true);
     setIsFeatured(true);

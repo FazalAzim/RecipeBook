@@ -175,7 +175,7 @@ export default function HomePage() {
               <div style={{ marginTop: '0.875rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                   <h4 style={{ fontSize: '0.9375rem', margin: 0 }}>Velvet Chocolate Mousse Cake</h4>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Pastry Chef Claire Dupont • 156 Pages PDF</span>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Pastry Chef Claire Dupont • 111 Pages PDF</span>
                 </div>
                 <span className="badge badge-pdf">PDF</span>
               </div>
