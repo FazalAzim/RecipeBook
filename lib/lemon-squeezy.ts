@@ -1,4 +1,9 @@
 import crypto from 'node:crypto';
+import {
+  getLemonSqueezyApiKey,
+  getLemonSqueezyMode,
+  getLemonSqueezyVariantId,
+} from './env';
 
 const API_BASE = 'https://api.lemonsqueezy.com/v1';
 
@@ -28,30 +33,27 @@ interface LemonSqueezyCheckoutData {
 }
 
 export function isLemonSqueezyConfigured(): boolean {
-  const apiKey = process.env.LEMON_SQUEEZY_API_KEY || '';
+  const apiKey = getLemonSqueezyApiKey();
   const storeId = process.env.LEMON_SQUEEZY_STORE_ID || '';
-  const variantId = process.env.LEMON_SQUEEZY_VARIANT_ID || '';
+  const variantId = getLemonSqueezyVariantId();
 
-  return Boolean(
-    apiKey.trim() &&
-    storeId.trim() &&
-    variantId.trim()
-  );
+  return Boolean(apiKey && storeId.trim() && variantId);
 }
 
 function getRequiredConfig() {
-  const apiKey = process.env.LEMON_SQUEEZY_API_KEY?.trim();
+  const apiKey = getLemonSqueezyApiKey();
   const storeId = process.env.LEMON_SQUEEZY_STORE_ID?.trim();
-  const variantId = process.env.LEMON_SQUEEZY_VARIANT_ID?.trim();
+  const variantId = getLemonSqueezyVariantId();
   const webhookSecret = process.env.LEMON_SQUEEZY_WEBHOOK_SECRET?.trim();
+  const mode = getLemonSqueezyMode();
 
   if (!apiKey || !storeId || !variantId) {
     throw new Error(
-      'Lemon Squeezy is not configured. Set LEMON_SQUEEZY_API_KEY, LEMON_SQUEEZY_STORE_ID, and LEMON_SQUEEZY_VARIANT_ID.'
+      `Lemon Squeezy is not configured for mode "${mode}". Set LEMON_SQUEEZY_API_KEY (or LEMON_SQUEEZY_API_KEY_${mode.toUpperCase()}), LEMON_SQUEEZY_STORE_ID, and LEMON_SQUEEZY_VARIANT_ID (or LEMON_SQUEEZY_VARIANT_ID_${mode.toUpperCase()}).`
     );
   }
 
-  return { apiKey, storeId, variantId, webhookSecret };
+  return { apiKey, storeId, variantId, webhookSecret, mode };
 }
 
 async function lemonSqueezyRequest<T>(
