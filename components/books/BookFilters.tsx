@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Search, X, SlidersHorizontal } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 import type { FilterState } from '@/lib/types';
 
 export const CATEGORIES = [
@@ -11,6 +11,7 @@ export const CATEGORIES = [
   'Desserts & Baking',
   'Quick & Family Meals',
   'British & American Classics',
+  'International / Western',
 ];
 
 export const CUISINES = [
@@ -20,6 +21,7 @@ export const CUISINES = [
   'French',
   'American',
   'British',
+  'International / Western',
 ];
 
 export const POPULAR_TAGS = [
@@ -61,7 +63,7 @@ export const BookFilters: React.FC<BookFiltersProps> = ({
   };
 
   return (
-    <div style={{ marginBottom: '2rem' }}>
+    <div className="book-filters" style={{ marginBottom: '1.5rem' }}>
       {/* Top Bar: Search and Sort */}
       <div
         style={{
@@ -73,7 +75,6 @@ export const BookFilters: React.FC<BookFiltersProps> = ({
         }}
         className="filter-search-sort"
       >
-        {/* Search Input */}
         <div style={{ position: 'relative', width: '100%' }}>
           <span
             style={{
@@ -84,21 +85,26 @@ export const BookFilters: React.FC<BookFiltersProps> = ({
               color: 'var(--text-muted)',
               display: 'flex',
               alignItems: 'center',
+              pointerEvents: 'none',
             }}
           >
             <Search size={18} />
           </span>
           <input
-            type="text"
-            placeholder="Search recipe books, cuisines, chef names, dishes..."
+            type="search"
+            enterKeyHint="search"
+            placeholder="Search cookbooks, cuisines, chefs..."
             value={filters.searchQuery}
             onChange={(e) => updateField('searchQuery', e.target.value)}
             className="form-input"
             style={{ paddingLeft: '2.5rem', paddingRight: filters.searchQuery ? '2.5rem' : '1rem' }}
+            aria-label="Search cookbooks"
           />
           {filters.searchQuery && (
             <button
+              type="button"
               onClick={() => updateField('searchQuery', '')}
+              aria-label="Clear search"
               style={{
                 position: 'absolute',
                 right: '0.875rem',
@@ -107,6 +113,9 @@ export const BookFilters: React.FC<BookFiltersProps> = ({
                 color: 'var(--text-muted)',
                 display: 'flex',
                 alignItems: 'center',
+                minWidth: 32,
+                minHeight: 32,
+                justifyContent: 'center',
               }}
             >
               <X size={16} />
@@ -114,13 +123,13 @@ export const BookFilters: React.FC<BookFiltersProps> = ({
           )}
         </div>
 
-        {/* Sort Dropdown */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div className="filter-sort-wrap" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <select
             value={filters.sortBy}
             onChange={(e) => updateField('sortBy', e.target.value)}
             className="form-select"
-            style={{ minWidth: '160px', height: '44px', cursor: 'pointer' }}
+            style={{ minWidth: '180px', cursor: 'pointer' }}
+            aria-label="Sort cookbooks"
           >
             <option value="featured">Featured Chef Picks</option>
             <option value="popular">Most Popular</option>
@@ -131,27 +140,24 @@ export const BookFilters: React.FC<BookFiltersProps> = ({
         </div>
       </div>
 
-      {/* Category Pills Slider */}
-      <div style={{ marginBottom: '0.875rem', overflowX: 'auto', paddingBottom: '0.25rem' }}>
-        <div style={{ display: 'flex', gap: '0.5rem', minWidth: 'max-content' }}>
+      {/* Category pills — intentional horizontal scroll on mobile */}
+      <div className="category-scroll" role="tablist" aria-label="Cookbook categories">
+        <div className="category-scroll-track">
           {CATEGORIES.map((cat) => {
             const isSelected = (filters.category === '' && cat === 'All') || filters.category === cat;
             return (
               <button
                 key={cat}
+                type="button"
+                role="tab"
+                aria-selected={isSelected}
                 onClick={() => updateField('category', cat === 'All' ? '' : cat)}
+                className="category-pill"
                 style={{
-                  padding: '0.4375rem 0.875rem',
-                  borderRadius: 'var(--radius-pill)',
-                  fontSize: '0.8125rem',
-                  fontWeight: 600,
                   backgroundColor: isSelected ? 'var(--primary)' : 'var(--bg-surface)',
                   color: isSelected ? '#FFFFFF' : 'var(--text-secondary)',
                   border: isSelected ? '1px solid var(--primary)' : '1px solid var(--border-base)',
                   boxShadow: isSelected ? 'var(--shadow-primary)' : 'var(--shadow-xs)',
-                  transition: 'all var(--transition-fast)',
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
                 }}
               >
                 {cat}
@@ -161,19 +167,19 @@ export const BookFilters: React.FC<BookFiltersProps> = ({
         </div>
       </div>
 
-      {/* Tag Chips & Quick Result Counter */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '0.75rem',
-          paddingTop: '0.5rem',
-        }}
-      >
+      {/* Tags + result count */}
+      {/* <div className="filter-meta-row">
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+          <span
+            className="hide-below-md"
+            style={{
+              fontSize: '0.75rem',
+              fontWeight: 700,
+              color: 'var(--text-muted)',
+              textTransform: 'uppercase',
+              letterSpacing: '0.04em',
+            }}
+          >
             Popular Tags:
           </span>
           {POPULAR_TAGS.map((tag) => {
@@ -181,12 +187,14 @@ export const BookFilters: React.FC<BookFiltersProps> = ({
             return (
               <button
                 key={tag}
+                type="button"
                 onClick={() => updateField('selectedTag', isSelected ? '' : tag)}
+                className="tag-chip"
                 style={{
                   fontSize: '0.75rem',
-                  padding: '0.25rem 0.625rem',
+                  padding: '0.375rem 0.7rem',
                   borderRadius: 'var(--radius-pill)',
-                  backgroundColor: isSelected ? 'var(--secondary-light)' : 'transparent',
+                  backgroundColor: isSelected ? 'var(--secondary-light)' : 'var(--bg-surface)',
                   color: isSelected ? '#92400E' : 'var(--text-secondary)',
                   border: isSelected ? '1px solid #FDE68A' : '1px solid var(--border-light)',
                   fontWeight: isSelected ? 700 : 500,
@@ -205,6 +213,7 @@ export const BookFilters: React.FC<BookFiltersProps> = ({
           </span>
           {hasActiveFilters && (
             <button
+              type="button"
               onClick={onReset}
               style={{
                 color: 'var(--primary)',
@@ -212,21 +221,14 @@ export const BookFilters: React.FC<BookFiltersProps> = ({
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '0.25rem',
+                minHeight: 36,
               }}
             >
               <X size={14} /> Clear filters
             </button>
           )}
         </div>
-      </div>
-
-      <style>{`
-        @media (max-width: 640px) {
-          .filter-search-sort {
-            grid-template-columns: 1fr !important;
-          }
-        }
-      `}</style>
+      </div> */}
     </div>
   );
 };

@@ -18,7 +18,7 @@ export const BookCard: React.FC<BookCardProps> = ({ book }) => {
 
   return (
     <div
-      className="surface-card surface-card-interactive"
+      className="surface-card surface-card-interactive book-card"
       style={{
         display: 'flex',
         flexDirection: 'column',
@@ -27,14 +27,15 @@ export const BookCard: React.FC<BookCardProps> = ({ book }) => {
         backgroundColor: 'var(--bg-surface)',
       }}
     >
-      {/* Cover Image Container */}
+      {/* Cover Image Container — contain keeps full artwork visible */}
       <div
+        className="book-card-cover"
         style={{
           position: 'relative',
           width: '100%',
-          paddingTop: '125%',
+          paddingTop: '133%',
           overflow: 'hidden',
-          backgroundColor: 'var(--bg-subtle)',
+          backgroundColor: '#1a1a1a',
         }}
       >
         <img
@@ -46,7 +47,8 @@ export const BookCard: React.FC<BookCardProps> = ({ book }) => {
             inset: 0,
             width: '100%',
             height: '100%',
-            objectFit: 'cover',
+            objectFit: 'contain',
+            objectPosition: 'center',
             transition: 'transform 0.4s ease',
           }}
           className="book-card-img"
@@ -54,13 +56,15 @@ export const BookCard: React.FC<BookCardProps> = ({ book }) => {
 
         {/* Badges on Cover */}
         <div
+          className="book-card-cover-badges-left"
           style={{
             position: 'absolute',
-            top: '0.75rem',
-            left: '0.75rem',
+            top: '0.625rem',
+            left: '0.625rem',
             display: 'flex',
             gap: '0.375rem',
             flexWrap: 'wrap',
+            maxWidth: '55%',
           }}
         >
           <Badge variant="pdf" icon={<FileText size={12} />}>
@@ -69,13 +73,16 @@ export const BookCard: React.FC<BookCardProps> = ({ book }) => {
           {book.featured && <Badge variant="amber">Featured</Badge>}
         </div>
 
-        <div style={{ position: 'absolute', top: '0.75rem', right: '0.75rem' }}>
+        <div
+          className="book-card-cover-badges-right"
+          style={{ position: 'absolute', top: '0.625rem', right: '0.625rem', maxWidth: '42%' }}
+        >
           <Badge variant="neutral">{book.category}</Badge>
         </div>
       </div>
 
       {/* Book Information */}
-      <div style={{ padding: '1.125rem', display: 'flex', flexDirection: 'column', flex: 1 }}>
+      <div className="book-card-body" style={{ padding: '1.125rem', display: 'flex', flexDirection: 'column', flex: 1 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', marginBottom: '0.375rem' }}>
           <div style={{ display: 'flex', color: '#F59F00' }}>
             <Star size={14} fill="#F59F00" />
@@ -93,6 +100,7 @@ export const BookCard: React.FC<BookCardProps> = ({ book }) => {
 
         <Link href={`/books/${book.id}`} style={{ textDecoration: 'none' }}>
           <h4
+            className="book-card-title"
             style={{
               fontSize: '1.0625rem',
               color: 'var(--text-primary)',
@@ -172,8 +180,10 @@ export const BookCard: React.FC<BookCardProps> = ({ book }) => {
       </div>
 
       <style>{`
-        .book-card-img:hover {
-          transform: scale(1.04);
+        @media (hover: hover) and (pointer: fine) {
+          .book-card-img:hover {
+            transform: scale(1.04);
+          }
         }
         @media (max-width: 479px) {
           .book-card-actions {

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { BookOpen, ArrowRight, Flame, Sparkles, ChefHat } from 'lucide-react';
+import { BookOpen, ArrowRight, Flame } from 'lucide-react';
 import { BookGrid } from '@/components/books/BookGrid';
 import { BookFilters } from '@/components/books/BookFilters';
 import { Button } from '@/components/common/Button';
@@ -110,7 +110,7 @@ export default function HomePage() {
               Explore chef-curated recipe guides, authentic global secret techniques, and printable weeknight meal plans. Buy once, download instantly, keep forever.
             </p>
 
-            <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
+            <div className="hero-cta-row" style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
               <a href="#cookbook-catalog" style={{ flex: '1 1 auto', minWidth: 'min(100%, 180px)' }}>
                 <Button variant="primary" size="lg" fullWidth rightIcon={<ArrowRight size={18} />}>
                   Explore Cookbooks
@@ -125,6 +125,7 @@ export default function HomePage() {
 
             {/* Quick stats ribbon */}
             <div
+              className="hero-stats"
               style={{
                 display: 'flex',
                 gap: '1.5rem',
@@ -165,6 +166,7 @@ export default function HomePage() {
               <img
                 src="/books/chocolate-mousse-cake-cover.png"
                 alt="Velvet Chocolate Mousse Cake Masterclass"
+                className="hero-cover-img"
                 style={{
                   borderRadius: 'var(--radius-md)',
                   width: '100%',
@@ -172,12 +174,15 @@ export default function HomePage() {
                   objectFit: 'cover',
                 }}
               />
-              <div style={{ marginTop: '0.875rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
+              <div
+                className="hero-cover-meta"
+                style={{ marginTop: '0.875rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.75rem' }}
+              >
+                <div style={{ minWidth: 0 }}>
                   <h4 style={{ fontSize: '0.9375rem', margin: 0 }}>Velvet Chocolate Mousse Cake</h4>
                   <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Pastry Chef Claire Dupont • 111 Pages PDF</span>
                 </div>
-                <span className="badge badge-pdf">PDF</span>
+                <span className="badge badge-pdf" style={{ flexShrink: 0 }}>PDF</span>
               </div>
             </div>
 
@@ -204,20 +209,32 @@ export default function HomePage() {
           @media (max-width: 900px) {
             .hero-grid {
               grid-template-columns: 1fr !important;
-              gap: 2rem !important;
+              gap: 1.5rem !important;
             }
             .hero-image-wrap {
-              max-width: 440px;
+              max-width: 100%;
               margin: 0 auto;
+              width: 100%;
+            }
+          }
+          @media (max-width: 767px) {
+            .hero-cover-img {
+              height: min(52vw, 240px) !important;
+            }
+            .hero-cover-meta h4 {
+              font-size: 0.875rem !important;
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
             }
           }
         `}</style>
       </section>
 
       {/* Catalog & Filter Section */}
-      <section className="page-section" style={{ padding: '2.5rem 0 4rem' }}>
+      <section className="page-section catalog-section" style={{ padding: '2.5rem 0 4rem' }} id="cookbook-catalog-section">
         <div className="container">
-          <div style={{ marginBottom: '1.5rem' }}>
+          <div className="catalog-heading" style={{ marginBottom: '1.25rem' }}>
             <h2 style={{ fontSize: '1.75rem', marginBottom: '0.25rem' }}>Explore Digital Recipe Books</h2>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.9375rem' }}>
               Handpicked step-by-step masterclasses formatted for easy reading on kitchen tablets and phones.

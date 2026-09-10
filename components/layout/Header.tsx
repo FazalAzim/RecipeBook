@@ -156,6 +156,7 @@ export const Header: React.FC = () => {
           {/* Shopping Cart Button */}
           <Link
             href="/cart"
+            className="header-cart-btn"
             style={{
               position: 'relative',
               display: 'flex',
@@ -168,6 +169,7 @@ export const Header: React.FC = () => {
               border: '1px solid var(--border-base)',
               color: 'var(--text-primary)',
               transition: 'all var(--transition-fast)',
+              flexShrink: 0,
             }}
             aria-label="View Shopping Cart"
           >

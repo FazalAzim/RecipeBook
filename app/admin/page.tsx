@@ -318,7 +318,9 @@ export default function AdminDashboardPage() {
                       style={{
                         width: '44px',
                         height: '56px',
-                        objectFit: 'cover',
+                        objectFit: 'contain',
+                        objectPosition: 'center',
+                        backgroundColor: '#1a1a1a',
                         borderRadius: 'var(--radius-sm)',
                       }}
                     />

@@ -142,6 +142,7 @@ export const Footer: React.FC = () => {
               <li><Link href="/?category=Desserts%20%26%20Baking" style={{ color: '#A8A29E' }}>Desserts & Patisserie</Link></li>
               <li><Link href="/?category=British%20%26%20American%20Classics" style={{ color: '#A8A29E' }}>British & American Classics</Link></li>
               <li><Link href="/?category=Quick%20%26%20Family%20Meals" style={{ color: '#A8A29E' }}>Quick Family Meals</Link></li>
+              <li><Link href="/?category=International%20%2F%20Western" style={{ color: '#A8A29E' }}>International / Western</Link></li>
             </ul>
           </div>
 

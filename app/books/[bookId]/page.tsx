@@ -130,7 +130,7 @@ export default function BookDetailPage({
                 position: 'relative',
                 overflow: 'hidden',
                 borderRadius: 'var(--radius-lg)',
-                backgroundColor: 'var(--bg-surface)',
+                backgroundColor: '#1a1a1a',
                 boxShadow: 'var(--shadow-lg)',
               }}
             >
@@ -140,9 +140,11 @@ export default function BookDetailPage({
                 style={{
                   width: '100%',
                   height: 'auto',
-                  maxHeight: '520px',
-                  objectFit: 'cover',
+                  maxHeight: '640px',
+                  objectFit: 'contain',
+                  objectPosition: 'center',
                   display: 'block',
+                  margin: '0 auto',
                 }}
               />
 

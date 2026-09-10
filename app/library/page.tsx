@@ -249,7 +249,9 @@ export default function LibraryPage() {
                       style={{
                         width: '80px',
                         height: '105px',
-                        objectFit: 'cover',
+                        objectFit: 'contain',
+                        objectPosition: 'center',
+                        backgroundColor: '#1a1a1a',
                         borderRadius: 'var(--radius-sm)',
                         flexShrink: 0,
                         boxShadow: 'var(--shadow-sm)',
