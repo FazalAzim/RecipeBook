@@ -7,6 +7,7 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { StickyMobileCart } from '@/components/cart/StickyMobileCart';
 import { ToastContainer } from '@/components/common/ToastContainer';
+import { VisitTracker } from '@/components/analytics/VisitTracker';
 
 export const metadata: Metadata = {
   title: 'RecipeBooks Market — Premium Digital Cookbooks & Recipe E-Books',
@@ -47,6 +48,7 @@ export default function RootLayout({
           <AuthProvider>
             <CartProvider>
               <div className="app-container has-sticky-cart">
+                <VisitTracker />
                 <Header />
                 <main className="main-content">{children}</main>
                 <Footer />

@@ -16,6 +16,7 @@ import {
   AlertTriangle,
   FileText,
   Sparkles,
+  Users,
 } from 'lucide-react';
 import { useToast } from '@/contexts/ToastContext';
 import { Button } from '@/components/common/Button';
@@ -33,6 +34,11 @@ export default function AdminDashboardPage() {
     booksSold: 0,
     totalRevenue: 0,
     totalOrders: 0,
+    pageViewsAllTime: 0,
+    pageViewsToday: 0,
+    uniqueVisitorsAllTime: 0,
+    uniqueVisitorsLast7Days: 0,
+    uniqueVisitorsToday: 0,
   });
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -63,7 +69,19 @@ export default function AdminDashboardPage() {
       }
       if (statsRes.ok) {
         const data = await statsRes.json();
-        setStats(data.stats || { totalBooks: 0, booksSold: 0, totalRevenue: 0, totalOrders: 0 });
+        setStats(
+          data.stats || {
+            totalBooks: 0,
+            booksSold: 0,
+            totalRevenue: 0,
+            totalOrders: 0,
+            pageViewsAllTime: 0,
+            pageViewsToday: 0,
+            uniqueVisitorsAllTime: 0,
+            uniqueVisitorsLast7Days: 0,
+            uniqueVisitorsToday: 0,
+          }
+        );
       }
     } catch (err: any) {
       console.error('Error loading admin stats:', err);
@@ -152,7 +170,7 @@ export default function AdminDashboardPage() {
         <div>
           <h1 style={{ fontSize: '1.875rem', marginBottom: '0.25rem' }}>Management Dashboard</h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.9375rem' }}>
-            Catalogue inventory, sales analytics, and customer delivery overview.
+            Catalogue inventory, sales analytics, visits, and customer delivery overview.
           </p>
         </div>
 
@@ -257,6 +275,58 @@ export default function AdminDashboardPage() {
           <div>
             <div style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>Completed Orders</div>
             <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-primary)' }}>{stats.totalOrders}</div>
+          </div>
+        </div>
+
+        <div className="surface-card" style={{ padding: '1.5rem', display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <div
+            style={{
+              width: '48px',
+              height: '48px',
+              borderRadius: 'var(--radius-md)',
+              backgroundColor: 'var(--primary-light)',
+              color: 'var(--primary)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Eye size={24} />
+          </div>
+          <div>
+            <div style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>Page Views</div>
+            <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+              {stats.pageViewsAllTime}
+            </div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>
+              Today: {stats.pageViewsToday}
+            </div>
+          </div>
+        </div>
+
+        <div className="surface-card" style={{ padding: '1.5rem', display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <div
+            style={{
+              width: '48px',
+              height: '48px',
+              borderRadius: 'var(--radius-md)',
+              backgroundColor: 'var(--accent-olive-light)',
+              color: 'var(--accent-olive)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Users size={24} />
+          </div>
+          <div>
+            <div style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>Unique Visitors</div>
+            <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+              {stats.uniqueVisitorsAllTime}
+            </div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>
+              Last 7 days: {stats.uniqueVisitorsLast7Days} · Today: {stats.uniqueVisitorsToday}
+            </div>
           </div>
         </div>
       </div>
