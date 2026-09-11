@@ -38,7 +38,7 @@ export default function RegisterPage() {
     setIsLoading(true);
 
     try {
-      await register(name, email, password, 'customer');
+      await register(name, email, password);
       showToast('Account created successfully! Welcome to RecipeBooks Market.', 'success');
       router.push('/');
     } catch (err: any) {
