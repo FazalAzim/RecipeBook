@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import Script from 'next/script';
 import './globals.css';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { CartProvider } from '@/contexts/CartContext';
@@ -17,6 +16,9 @@ export const metadata: Metadata = {
     icon: { url: '/favicon.png', type: 'image/png' },
     apple: { url: '/favicon.png', type: 'image/png' },
   },
+  other: {
+    'google-adsense-account': 'ca-pub-4291207946566587',
+  },
 };
 
 export default function RootLayout({
@@ -33,14 +35,14 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap"
           rel="stylesheet"
         />
-      </head>
-      <body>
-        <Script
+        {/* AdSense: must be in initial HTML so Google's crawler can verify the site */}
+        <script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4291207946566587"
           crossOrigin="anonymous"
-          strategy="afterInteractive"
         />
+      </head>
+      <body>
         <ToastProvider>
           <AuthProvider>
             <CartProvider>
