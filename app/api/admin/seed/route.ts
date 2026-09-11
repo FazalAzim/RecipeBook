@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import { purgeLegacySeedBooks } from '@/lib/db/books';
-import { ensureDefaultUsers } from '@/lib/db/users';
 import { getSessionUser } from '@/lib/auth';
 
+/** Admin-only maintenance: removes legacy demo books. Does not create users. */
 export async function POST() {
   try {
     const sessionUser = await getSessionUser();
@@ -11,13 +11,13 @@ export async function POST() {
     }
 
     await purgeLegacySeedBooks();
-    await ensureDefaultUsers();
 
     return NextResponse.json({
       success: true,
-      message: 'Database initialized. Legacy demo books removed; admin account ready.',
+      message: 'Legacy demo books removed. No default users were created.',
     });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message || 'Initialization failed.' }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Initialization failed.';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

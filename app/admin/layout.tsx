@@ -47,10 +47,10 @@ export default function AdminLayout({
       showToast('Initializing database...', 'info');
       const res = await fetch('/api/admin/seed', { method: 'POST' });
       if (!res.ok) throw new Error('Initialization failed');
-      showToast('Database ready. Demo books removed; admin account ensured.', 'success');
+      showToast('Legacy demo books removed.', 'success');
       window.location.reload();
     } catch (e: any) {
-      showToast(e.message || 'Seeding failed', 'error');
+      showToast(e.message || 'Cleanup failed', 'error');
     }
   };
 
@@ -160,7 +160,7 @@ export default function AdminLayout({
           }}
         >
           <Sparkles size={18} />
-          <span>Seed Initial Books</span>
+          <span>Clean Legacy Demo Books</span>
         </button>
       </nav>
 

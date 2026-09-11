@@ -37,15 +37,18 @@ async function main(): Promise<void> {
   loadEnvLocal();
 
   const { ensureOrderIndexes } = await import('../lib/db/order-indexes');
+  const { ensureUserIndexes } = await import('../lib/db/users');
   const { getMongoDbName } = await import('../lib/mongodb');
 
-  console.log('Creating order indexes on database:', getMongoDbName());
+  console.log('Creating indexes on database:', getMongoDbName());
 
   await ensureOrderIndexes();
+  await ensureUserIndexes();
 
-  console.log('✅ Order indexes ensured:');
+  console.log('✅ Indexes ensured:');
   console.log('   - orders_paymentReferenceId_unique (unique)');
   console.log('   - orders_lemonSqueezyOrderId_unique (unique, sparse)');
+  console.log('   - users_email_unique (unique)');
 }
 
 main()

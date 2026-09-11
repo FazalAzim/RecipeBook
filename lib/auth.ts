@@ -80,3 +80,10 @@ export async function getSessionUser(): Promise<UserProfile | null> {
     return null;
   }
 }
+
+/** Returns the session user only if they are an admin; otherwise null. */
+export async function getAdminSessionUser(): Promise<UserProfile | null> {
+  const user = await getSessionUser();
+  if (!user || user.role !== 'admin') return null;
+  return user;
+}

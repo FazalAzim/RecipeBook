@@ -1,13 +1,15 @@
 /**
- * Standalone database setup script for RecipeBooks Market.
- * Ensures the default admin account and removes legacy demo cookbooks.
+ * Standalone database maintenance for RecipeBooks Market.
+ * Removes legacy demo cookbooks. Does NOT create default passwords/users.
+ *
+ * Create an admin with:
+ *   npm run create-admin
  *
  * Usage:
  *   npx ts-node scripts/migrate-firebase-to-mongodb.ts
  */
 
 import { MongoClient } from 'mongodb';
-import bcrypt from 'bcryptjs';
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/recipebooks';
 
@@ -22,7 +24,7 @@ const LEGACY_SEED_BOOK_IDS = [
 ];
 
 async function main() {
-  console.log('🚀 Starting MongoDB setup script...');
+  console.log('🚀 Starting MongoDB maintenance script...');
   const client = new MongoClient(MONGODB_URI);
 
   try {
@@ -39,28 +41,18 @@ async function main() {
     });
     console.log(`✅ Removed ${purgeResult.deletedCount} legacy demo cookbook(s).`);
 
+    // Remove known insecure demo accounts if they still exist
     const usersCol = db.collection('users');
-    const adminPasswordHash = await bcrypt.hash('admin123', 10);
-    await usersCol.updateOne(
-      { email: 'admin@recipebooks.com' },
-      {
-        $set: {
-          id: 'admin-user-001',
-          name: 'Master Chef Admin',
-          email: 'admin@recipebooks.com',
-          passwordHash: adminPasswordHash,
-          role: 'admin',
-          updatedAt: new Date(),
-        },
-        $setOnInsert: {
-          createdAt: new Date(),
-        },
-      },
-      { upsert: true }
-    );
-    console.log('✅ Admin account ensured: admin@recipebooks.com');
+    const demoEmails = ['admin@recipebooks.com', 'customer@recipebooks.com'];
+    const removedUsers = await usersCol.deleteMany({ email: { $in: demoEmails } });
+    if (removedUsers.deletedCount > 0) {
+      console.log(`✅ Removed ${removedUsers.deletedCount} legacy demo user account(s).`);
+    }
 
-    console.log('🎉 Setup script completed successfully!');
+    await usersCol.createIndex({ email: 1 }, { unique: true, name: 'users_email_unique' });
+    console.log('✅ Ensured unique index on users.email');
+
+    console.log('🎉 Maintenance completed. Create an admin with: npm run create-admin');
   } catch (err) {
     console.error('❌ Setup failed:', err);
   } finally {

@@ -10,7 +10,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   loading: boolean;
   login: (email: string, password: string) => Promise<UserProfile>;
-  register: (name: string, email: string, password: string, role?: UserRole) => Promise<UserProfile>;
+  register: (name: string, email: string, password: string) => Promise<UserProfile>;
   logout: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   refreshUser: () => Promise<void>;
@@ -69,15 +69,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const register = async (
     name: string,
     email: string,
-    password: string,
-    role: UserRole = 'customer'
+    password: string
   ): Promise<UserProfile> => {
     setLoading(true);
     try {
       const res = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password, role }),
+        body: JSON.stringify({ name, email, password }),
       });
 
       const data = await res.json();

@@ -9,6 +9,7 @@
     "lint": "next lint",
     "seed": "node --loader ts-node/esm scripts/migrate-firebase-to-mongodb.ts",
     "create-indexes": "npx tsx scripts/create-indexes.ts",
+    "create-admin": "node scripts/create-admin.js",
     "env:check": "node scripts/check-env.js"
   },
   "dependencies": {

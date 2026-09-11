@@ -5,7 +5,7 @@ import { hashPassword, signSessionToken, SESSION_COOKIE_NAME } from '@/lib/auth'
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { name, email, password, role = 'customer' } = body;
+    const { name, email, password } = body;
 
     if (!email || !password || !name) {
       return NextResponse.json(
@@ -31,7 +31,8 @@ export async function POST(req: NextRequest) {
     }
 
     const passwordHash = await hashPassword(password);
-    const user = await createUser(name, cleanEmail, passwordHash, role);
+    // Never accept role from the client — public registration is customer-only.
+    const user = await createUser(name, cleanEmail, passwordHash);
 
     const token = await signSessionToken({
       id: user.id,

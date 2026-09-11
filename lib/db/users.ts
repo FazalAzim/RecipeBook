@@ -1,5 +1,4 @@
 import { getDb, isMongoConfigured } from '../mongodb';
-import { hashPassword } from '../auth';
 import type { UserProfile, UserRole } from '../types';
 
 export interface UserDocument {
@@ -12,72 +11,42 @@ export interface UserDocument {
   updatedAt: Date;
 }
 
-// Fallback in-memory users
+/** Dev-only fallback when MongoDB is unavailable. Never seeded with default accounts. */
 let inMemoryUsers: UserDocument[] = [];
 
-export async function ensureDefaultUsers(): Promise<void> {
-  const adminHash = await hashPassword('admin123');
-  const customerHash = await hashPassword('customer123');
+function mapUserDoc(doc: UserDocument & { _id?: { toString(): string } }): UserDocument {
+  return {
+    id: doc.id || doc._id?.toString() || '',
+    name: doc.name,
+    email: doc.email,
+    passwordHash: doc.passwordHash,
+    role: doc.role,
+    createdAt: doc.createdAt,
+    updatedAt: doc.updatedAt,
+  };
+}
 
-  const defaultUsers: UserDocument[] = [
-    {
-      id: 'admin-user-001',
-      name: 'Master Chef Admin',
-      email: 'admin@recipebooks.com',
-      passwordHash: adminHash,
-      role: 'admin',
-      createdAt: new Date('2026-01-01'),
-      updatedAt: new Date('2026-01-01'),
-    },
-    {
-      id: 'cust-user-001',
-      name: 'Amina Zahir',
-      email: 'customer@recipebooks.com',
-      passwordHash: customerHash,
-      role: 'customer',
-      createdAt: new Date('2026-01-10'),
-      updatedAt: new Date('2026-01-10'),
-    },
-  ];
-
-  if (inMemoryUsers.length === 0) {
-    inMemoryUsers = [...defaultUsers];
-  }
-
+export async function ensureUserIndexes(): Promise<void> {
   const db = await getDb();
-  if (db && isMongoConfigured()) {
-    try {
-      const usersCol = db.collection<UserDocument>('users');
-      for (const u of defaultUsers) {
-        const existing = await usersCol.findOne({ email: u.email });
-        if (!existing) {
-          await usersCol.insertOne(u);
-        }
-      }
-    } catch (err) {
-      console.warn('Error seeding default users into MongoDB:', err);
-    }
+  if (!db || !isMongoConfigured()) {
+    throw new Error('MongoDB is not configured. Set MONGODB_URI before creating indexes.');
   }
+
+  await db.collection('users').createIndex(
+    { email: 1 },
+    { unique: true, name: 'users_email_unique' }
+  );
 }
 
 export async function findUserByEmail(email: string): Promise<UserDocument | null> {
   const cleanEmail = email.trim().toLowerCase();
-  await ensureDefaultUsers();
 
   const db = await getDb();
   if (db && isMongoConfigured()) {
     try {
       const doc = await db.collection<UserDocument>('users').findOne({ email: cleanEmail });
       if (doc) {
-        return {
-          id: doc.id || (doc as any)._id.toString(),
-          name: doc.name,
-          email: doc.email,
-          passwordHash: doc.passwordHash,
-          role: doc.role,
-          createdAt: doc.createdAt,
-          updatedAt: doc.updatedAt,
-        };
+        return mapUserDoc(doc as UserDocument & { _id?: { toString(): string } });
       }
     } catch (err) {
       console.warn('Error finding user by email in MongoDB:', err);
@@ -88,8 +57,6 @@ export async function findUserByEmail(email: string): Promise<UserDocument | nul
 }
 
 export async function findUserById(id: string): Promise<UserProfile | null> {
-  await ensureDefaultUsers();
-
   const db = await getDb();
   if (db && isMongoConfigured()) {
     try {
@@ -121,13 +88,38 @@ export async function findUserById(id: string): Promise<UserProfile | null> {
   };
 }
 
+/**
+ * Creates a customer account. Role is always "customer" — admins are created via scripts/create-admin only.
+ */
 export async function createUser(
   name: string,
   email: string,
+  passwordHash: string
+): Promise<UserProfile> {
+  return insertUser(name, email, passwordHash, 'customer');
+}
+
+/** Creates an admin account. Intended for trusted setup scripts only. */
+export async function createAdminUser(
+  name: string,
+  email: string,
+  passwordHash: string
+): Promise<UserProfile> {
+  return insertUser(name, email, passwordHash, 'admin');
+}
+
+async function insertUser(
+  name: string,
+  email: string,
   passwordHash: string,
-  role: UserRole = 'customer'
+  role: UserRole
 ): Promise<UserProfile> {
   const cleanEmail = email.trim().toLowerCase();
+  const existing = await findUserByEmail(cleanEmail);
+  if (existing) {
+    throw new Error('An account with this email address already exists.');
+  }
+
   const userId = `usr-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
   const now = new Date();
 
@@ -144,9 +136,9 @@ export async function createUser(
   const db = await getDb();
   if (db && isMongoConfigured()) {
     await db.collection<UserDocument>('users').insertOne(newUser);
+  } else {
+    inMemoryUsers.push(newUser);
   }
-
-  inMemoryUsers.push(newUser);
 
   return {
     id: userId,
