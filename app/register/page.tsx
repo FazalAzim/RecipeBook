@@ -93,7 +93,7 @@ export default function RegisterPage() {
         {error && (
           <div
             style={{
-              backgroundColor: '#FFF5F5',
+              backgroundColor: 'var(--accent-berry-light)',
               border: '1px solid #FFC9C9',
               borderRadius: 'var(--radius-md)',
               padding: '0.75rem 1rem',

@@ -75,9 +75,9 @@ export const StickyMobileCart: React.FC = () => {
         </div>
       </div>
 
-      <Link href="/cart">
+      <Link href="/checkout">
         <Button variant="primary" size="sm" rightIcon={<ArrowRight size={14} />}>
-          View Cart
+          Checkout · ${total.toFixed(2)}
         </Button>
       </Link>
     </div>

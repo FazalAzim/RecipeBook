@@ -106,7 +106,7 @@ export default function PaymentPage() {
         {errorMessage && (
           <div
             style={{
-              backgroundColor: '#FFF5F5',
+              backgroundColor: 'var(--accent-berry-light)',
               border: '1.5px solid #FFC9C9',
               borderRadius: 'var(--radius-md)',
               padding: '1rem 1.25rem',

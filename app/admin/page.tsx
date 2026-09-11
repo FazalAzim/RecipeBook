@@ -465,7 +465,7 @@ export default function AdminDashboardPage() {
             </div>
 
             {bookToDelete.salesCount > 0 ? (
-              <div style={{ backgroundColor: 'var(--secondary-light)', padding: '0.875rem', borderRadius: 'var(--radius-md)', fontSize: '0.8125rem', color: '#92400E', marginBottom: '1.5rem' }}>
+              <div style={{ backgroundColor: 'var(--secondary-light)', padding: '0.875rem', borderRadius: 'var(--radius-md)', fontSize: '0.8125rem', color: '#FBBF24', marginBottom: '1.5rem' }}>
                 <strong>Safe Soft-Delete Notice:</strong> This cookbook has {bookToDelete.salesCount} prior purchase(s). To protect your customers&apos; library download rights, it will be safely unpublished from the storefront rather than permanently deleted.
               </div>
             ) : (

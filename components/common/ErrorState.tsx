@@ -25,7 +25,7 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#FFF5F5',
+        backgroundColor: 'var(--accent-berry-light)',
         border: '1.5px solid #FFC9C9',
         maxWidth: '540px',
         margin: '2rem auto',

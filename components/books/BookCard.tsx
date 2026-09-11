@@ -2,8 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { ShoppingBag, FileText, Star, Eye } from 'lucide-react';
-import { Badge } from '../common/Badge';
+import { ShoppingBag, Star } from 'lucide-react';
 import { Button } from '../common/Button';
 import { useCart } from '@/contexts/CartContext';
 import type { Book } from '@/lib/types';
@@ -16,6 +15,14 @@ export const BookCard: React.FC<BookCardProps> = ({ book }) => {
   const { addItem, isInCart } = useCart();
   const inCart = isInCart(book.id);
 
+  const benefitLine =
+    book.description?.trim().split(/[.!?\n]/).filter(Boolean)[0]?.trim() ||
+    `${book.pageCount} pages · Instant PDF download`;
+
+  const handleAdd = () => {
+    addItem(book, 1);
+  };
+
   return (
     <div
       className="surface-card surface-card-interactive book-card"
@@ -27,8 +34,9 @@ export const BookCard: React.FC<BookCardProps> = ({ book }) => {
         backgroundColor: 'var(--bg-surface)',
       }}
     >
-      {/* Cover Image Container — contain keeps full artwork visible */}
-      <div
+      {/* Clean cover — no overlay badges so artwork sells the book */}
+      <Link
+        href={`/books/${book.id}`}
         className="book-card-cover"
         style={{
           position: 'relative',
@@ -36,12 +44,14 @@ export const BookCard: React.FC<BookCardProps> = ({ book }) => {
           paddingTop: '133%',
           overflow: 'hidden',
           backgroundColor: '#1a1a1a',
+          display: 'block',
         }}
       >
         <img
           src={book.coverImageUrl}
           alt={book.title}
           loading="lazy"
+          className="book-card-img"
           style={{
             position: 'absolute',
             inset: 0,
@@ -51,50 +61,56 @@ export const BookCard: React.FC<BookCardProps> = ({ book }) => {
             objectPosition: 'center',
             transition: 'transform 0.4s ease',
           }}
-          className="book-card-img"
         />
+        {book.featured && (
+          <span
+            style={{
+              position: 'absolute',
+              bottom: '0.625rem',
+              left: '0.625rem',
+              backgroundColor: 'rgba(26, 22, 19, 0.95)',
+              color: '#FBBF24',
+              fontSize: '0.6875rem',
+              fontWeight: 700,
+              padding: '0.25rem 0.5rem',
+              borderRadius: 'var(--radius-pill)',
+              boxShadow: 'var(--shadow-sm)',
+              border: '1px solid rgba(232, 163, 23, 0.35)',
+            }}
+          >
+            Featured
+          </span>
+        )}
+      </Link>
 
-        {/* Badges on Cover */}
+      <div className="book-card-body" style={{ padding: '1rem', display: 'flex', flexDirection: 'column', flex: 1 }}>
         <div
-          className="book-card-cover-badges-left"
           style={{
-            position: 'absolute',
-            top: '0.625rem',
-            left: '0.625rem',
             display: 'flex',
-            gap: '0.375rem',
+            alignItems: 'center',
+            gap: '0.5rem',
+            marginBottom: '0.5rem',
             flexWrap: 'wrap',
-            maxWidth: '55%',
           }}
         >
-          <Badge variant="pdf" icon={<FileText size={12} />}>
-            PDF
-          </Badge>
-          {book.featured && <Badge variant="amber">Featured</Badge>}
-        </div>
-
-        <div
-          className="book-card-cover-badges-right"
-          style={{ position: 'absolute', top: '0.625rem', right: '0.625rem', maxWidth: '42%' }}
-        >
-          <Badge variant="neutral">{book.category}</Badge>
-        </div>
-      </div>
-
-      {/* Book Information */}
-      <div className="book-card-body" style={{ padding: '1.125rem', display: 'flex', flexDirection: 'column', flex: 1 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', marginBottom: '0.375rem' }}>
-          <div style={{ display: 'flex', color: '#F59F00' }}>
-            <Star size={14} fill="#F59F00" />
-          </div>
-          <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+          <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>
+            {book.category}
+          </span>
+          <span style={{ color: 'var(--border-dark)' }}>·</span>
+          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>PDF</span>
+          <span
+            style={{
+              marginLeft: 'auto',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.2rem',
+              fontSize: '0.75rem',
+              fontWeight: 600,
+              color: 'var(--text-primary)',
+            }}
+          >
+            <Star size={12} fill="#F59F00" color="#F59F00" />
             {book.rating || 4.9}
-          </span>
-          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-            ({book.reviewCount || 48})
-          </span>
-          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginLeft: 'auto' }}>
-            {book.pageCount} pages
           </span>
         </div>
 
@@ -104,7 +120,7 @@ export const BookCard: React.FC<BookCardProps> = ({ book }) => {
             style={{
               fontSize: '1.0625rem',
               color: 'var(--text-primary)',
-              lineHeight: 1.35,
+              lineHeight: 1.3,
               marginBottom: '0.25rem',
               display: '-webkit-box',
               WebkitLineClamp: 2,
@@ -117,18 +133,26 @@ export const BookCard: React.FC<BookCardProps> = ({ book }) => {
           </h4>
         </Link>
 
-        <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '0.875rem' }}>
+        <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
           By {book.author}
         </p>
 
-        {/* Price & Actions */}
-        <div
+        <p
           style={{
-            marginTop: 'auto',
-            paddingTop: '0.875rem',
-            borderTop: '1px solid var(--border-light)',
+            fontSize: '0.8125rem',
+            color: 'var(--text-secondary)',
+            lineHeight: 1.45,
+            marginBottom: '0.875rem',
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
           }}
         >
+          {benefitLine}
+        </p>
+
+        <div style={{ marginTop: 'auto' }}>
           <div
             style={{
               display: 'flex',
@@ -138,12 +162,9 @@ export const BookCard: React.FC<BookCardProps> = ({ book }) => {
             }}
           >
             <div>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>
-                Instant Download
-              </span>
               <span
                 style={{
-                  fontSize: '1.25rem',
+                  fontSize: '1.375rem',
                   fontWeight: 800,
                   color: 'var(--primary-dark)',
                   fontFamily: 'var(--font-heading)',
@@ -151,18 +172,18 @@ export const BookCard: React.FC<BookCardProps> = ({ book }) => {
               >
                 ${book.price.toFixed(2)}
               </span>
+              <span style={{ display: 'block', fontSize: '0.6875rem', color: 'var(--text-muted)' }}>
+                Instant download · {book.pageCount} pages
+              </span>
             </div>
-            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
-              {book.fileSize}
-            </span>
           </div>
 
           <div
-            style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}
             className="book-card-actions"
+            style={{ display: 'grid', gridTemplateColumns: '0.85fr 1.25fr', gap: '0.5rem' }}
           >
             <Link href={`/books/${book.id}`} style={{ width: '100%' }}>
-              <Button variant="secondary" size="sm" fullWidth leftIcon={<Eye size={14} />}>
+              <Button variant="secondary" size="sm" fullWidth>
                 Details
               </Button>
             </Link>
@@ -171,7 +192,7 @@ export const BookCard: React.FC<BookCardProps> = ({ book }) => {
               size="sm"
               fullWidth
               leftIcon={<ShoppingBag size={14} />}
-              onClick={() => addItem(book, 1)}
+              onClick={handleAdd}
             >
               {inCart ? 'Add More' : 'Add to Cart'}
             </Button>
@@ -182,7 +203,7 @@ export const BookCard: React.FC<BookCardProps> = ({ book }) => {
       <style>{`
         @media (hover: hover) and (pointer: fine) {
           .book-card-img:hover {
-            transform: scale(1.04);
+            transform: scale(1.03);
           }
         }
         @media (max-width: 479px) {

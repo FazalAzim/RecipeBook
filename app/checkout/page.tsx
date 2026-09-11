@@ -159,7 +159,7 @@ export default function CheckoutPage() {
                     {authError && (
                       <div
                         style={{
-                          backgroundColor: '#FFF5F5',
+                          backgroundColor: 'var(--accent-berry-light)',
                           color: 'var(--accent-berry)',
                           padding: '0.625rem 0.875rem',
                           borderRadius: 'var(--radius-sm)',

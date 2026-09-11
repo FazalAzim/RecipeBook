@@ -1,50 +1,50 @@
 /* ==========================================================================
    RecipeBooks Market — Global Design System & Styles (Next.js App Router)
-   Warm culinary aesthetic with rich food-inspired tones & modern UX
+   Dark kitchen theme: charcoal surfaces, warm ember accents, cream type
    ========================================================================== */
 
 :root {
-  /* Brand Warm Food Palette */
-  --primary: #E8590C;
-  --primary-hover: #D9480F;
-  --primary-dark: #C22500;
-  --primary-light: #FFF4E6;
-  --primary-border: #FFD8A8;
-  --primary-glow: rgba(232, 89, 12, 0.18);
+  /* Brand — ember orange on dark kitchen */
+  --primary: #F06A22;
+  --primary-hover: #FF7A33;
+  --primary-dark: #FF922B;
+  --primary-light: #2A1A12;
+  --primary-border: #5C3418;
+  --primary-glow: rgba(240, 106, 34, 0.28);
 
-  --secondary: #D97706;
-  --secondary-light: #FEF3C7;
-  
-  --accent-olive: #2B8A3E;
-  --accent-olive-light: #EBFBEE;
-  
-  --accent-berry: #C92A2A;
-  --accent-berry-light: #FFE3E3;
+  --secondary: #E8A317;
+  --secondary-light: #2A2210;
 
-  /* Neutrals & Surfaces */
-  --bg-app: #FAF7F2;
-  --bg-surface: #FFFFFF;
-  --bg-subtle: #F3ECE2;
-  --bg-input: #FFFFFF;
-  --bg-highlight: #FFFDF9;
+  --accent-olive: #4ADE80;
+  --accent-olive-light: #14241A;
 
-  --text-primary: #1C1917;
-  --text-secondary: #57534E;
-  --text-muted: #8C827A;
-  --text-light: #A8A29E;
+  --accent-berry: #F87171;
+  --accent-berry-light: #2A1414;
+
+  /* Dark kitchen neutrals */
+  --bg-app: #100E0C;
+  --bg-surface: #1A1613;
+  --bg-subtle: #241F1A;
+  --bg-input: #1F1A16;
+  --bg-highlight: #221C17;
+
+  --text-primary: #F3EDE4;
+  --text-secondary: #C9BDB0;
+  --text-muted: #9A8E80;
+  --text-light: #6F655A;
   --text-inverted: #FFFFFF;
 
-  --border-light: #EFE8DF;
-  --border-base: #E4DACD;
-  --border-dark: #CDC1B0;
+  --border-light: #2C2621;
+  --border-base: #3A322B;
+  --border-dark: #524840;
 
-  /* Shadows */
-  --shadow-xs: 0 1px 2px rgba(28, 25, 23, 0.04);
-  --shadow-sm: 0 2px 4px rgba(28, 25, 23, 0.05);
-  --shadow-md: 0 4px 12px rgba(28, 25, 23, 0.07);
-  --shadow-lg: 0 10px 25px -4px rgba(28, 25, 23, 0.09), 0 4px 6px -2px rgba(28, 25, 23, 0.04);
-  --shadow-xl: 0 20px 35px -6px rgba(28, 25, 23, 0.12), 0 8px 12px -4px rgba(28, 25, 23, 0.06);
-  --shadow-primary: 0 8px 20px -3px rgba(232, 89, 12, 0.3);
+  /* Shadows — deeper for dark surfaces */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 6px 16px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 12px 28px -4px rgba(0, 0, 0, 0.55), 0 4px 10px rgba(0, 0, 0, 0.35);
+  --shadow-xl: 0 22px 40px -8px rgba(0, 0, 0, 0.65), 0 10px 16px rgba(0, 0, 0, 0.4);
+  --shadow-primary: 0 8px 24px -4px rgba(240, 106, 34, 0.45);
 
   /* Radii */
   --radius-sm: 8px;
@@ -68,6 +68,7 @@
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --page-pad-x: 1rem;
   --page-pad-y: 1.5rem;
+  color-scheme: dark;
 }
 
 @media (min-width: 768px) {
@@ -89,11 +90,16 @@ html {
   font-size: 16px;
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
+  color-scheme: dark;
 }
 
 body {
   font-family: var(--font-body);
   background-color: var(--bg-app);
+  background-image:
+    radial-gradient(ellipse at top, rgba(240, 106, 34, 0.06) 0%, transparent 55%),
+    linear-gradient(180deg, #100E0C 0%, #0C0A09 100%);
+  background-attachment: fixed;
   color: var(--text-primary);
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
@@ -285,7 +291,7 @@ body.mobile-nav-open .sticky-mobile-cart {
   border: none;
   padding: 0;
   margin: 0;
-  background: rgba(28, 25, 23, 0.45);
+  background: rgba(0, 0, 0, 0.65);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
@@ -511,9 +517,9 @@ body.mobile-nav-open .sticky-mobile-cart {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--primary) 0%, #D9480F 100%);
-  color: var(--text-inverted);
-  box-shadow: 0 3px 8px rgba(232, 89, 12, 0.25);
+  background: linear-gradient(135deg, #F06A22 0%, #D9480F 100%);
+  color: #FFFFFF;
+  box-shadow: 0 4px 14px rgba(240, 106, 34, 0.35);
 }
 
 .btn-primary:hover:not(:disabled) {
@@ -611,16 +617,16 @@ body.mobile-nav-open .sticky-mobile-cart {
 }
 
 .badge-pdf {
-  background-color: #FFF0F0;
-  color: #D91B24;
-  border: 1px solid #FFC9C9;
+  background-color: rgba(248, 113, 113, 0.12);
+  color: #FCA5A5;
+  border: 1px solid rgba(248, 113, 113, 0.28);
   font-weight: 700;
 }
 
 .badge-success {
   background-color: var(--accent-olive-light);
   color: var(--accent-olive);
-  border: 1px solid #B2F2BB;
+  border: 1px solid rgba(74, 222, 128, 0.28);
 }
 
 .badge-neutral {
@@ -631,8 +637,8 @@ body.mobile-nav-open .sticky-mobile-cart {
 
 .badge-amber {
   background-color: var(--secondary-light);
-  color: #92400E;
-  border: 1px solid #FDE68A;
+  color: #FBBF24;
+  border: 1px solid rgba(232, 163, 23, 0.3);
 }
 
 /* Form Controls */
@@ -685,7 +691,7 @@ body.mobile-nav-open .sticky-mobile-cart {
   min-height: 48px;
   padding: 0 2.75rem 0 1rem;
   line-height: 48px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238C827A' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239A8E80' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 0.875rem center;
   background-size: 16px 16px;
@@ -809,7 +815,7 @@ body.mobile-nav-open .sticky-mobile-cart {
 
 /* Skeleton Loaders */
 .skeleton {
-  background: linear-gradient(90deg, #F0E8DF 25%, #FAF5EE 50%, #F0E8DF 75%);
+  background: linear-gradient(90deg, #241F1A 25%, #2E2822 50%, #241F1A 75%);
   background-size: 200% 100%;
   animation: skeleton-loading 1.5s infinite;
   border-radius: var(--radius-md);

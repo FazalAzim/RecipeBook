@@ -147,22 +147,6 @@ export default function BookDetailPage({
                   margin: '0 auto',
                 }}
               />
-
-              <div
-                style={{
-                  position: 'absolute',
-                  top: '1rem',
-                  left: '1rem',
-                  display: 'flex',
-                  gap: '0.5rem',
-                  flexWrap: 'wrap',
-                }}
-              >
-                <Badge variant="pdf" icon={<FileText size={14} />}>
-                  Official PDF
-                </Badge>
-                {book.featured && <Badge variant="amber">Featured Masterclass</Badge>}
-              </div>
             </div>
 
             {/* Guaranteed digital highlights */}
@@ -177,22 +161,31 @@ export default function BookDetailPage({
                 gap: '0.875rem',
               }}
             >
+              <div style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.125rem' }}>
+                What you get
+              </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                 <Download size={18} color="var(--primary)" />
                 <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-                  Instant digital download upon checkout
+                  Instant digital download after payment
                 </span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                 <Smartphone size={18} color="var(--accent-olive)" />
                 <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-                  Tablet, iPad & smartphone screen optimized
+                  Works on phone, tablet, iPad & desktop
                 </span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                 <Printer size={18} color="var(--secondary)" />
                 <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-                  High-res 300 DPI print-ready formatting
+                  Print-friendly high-resolution PDF
+                </span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <ShieldCheck size={18} color="var(--primary-dark)" />
+                <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                  Lifetime library access — re-download anytime
                 </span>
               </div>
             </div>
@@ -201,8 +194,12 @@ export default function BookDetailPage({
           {/* Right Column: Book Specifications & Purchasing */}
           <div>
             <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem', flexWrap: 'wrap' }}>
+              <Badge variant="pdf" icon={<FileText size={12} />}>
+                Digital PDF
+              </Badge>
               <Badge variant="neutral">{book.category}</Badge>
-              <Badge variant="primary">{book.cuisine} Cuisine</Badge>
+              <Badge variant="primary">{book.cuisine}</Badge>
+              {book.featured && <Badge variant="amber">Featured</Badge>}
             </div>
 
             <h1 style={{ fontSize: 'clamp(1.75rem, 3.5vw, 2.375rem)', marginBottom: '0.5rem', lineHeight: 1.2 }}>
@@ -332,7 +329,7 @@ export default function BookDetailPage({
             <div
               style={{
                 display: 'flex',
-                gap: '1rem',
+                gap: '0.75rem',
                 alignItems: 'center',
                 paddingTop: '1.5rem',
                 borderTop: '1px solid var(--border-light)',
@@ -346,7 +343,7 @@ export default function BookDetailPage({
                 size="lg"
                 leftIcon={<ShoppingBag size={20} />}
                 onClick={handleAddToCart}
-                style={{ flex: '1 1 180px' }}
+                style={{ flex: '1 1 150px' }}
               >
                 Add to Cart
               </Button>
@@ -355,11 +352,25 @@ export default function BookDetailPage({
                 variant="primary"
                 size="lg"
                 onClick={handleBuyNow}
-                style={{ flex: '1 1 180px' }}
+                style={{ flex: '1.4 1 200px' }}
               >
-                Buy Now (${(book.price * quantity).toFixed(2)})
+                Buy Now — ${(book.price * quantity).toFixed(2)}
               </Button>
             </div>
+
+            <p
+              style={{
+                marginTop: '0.875rem',
+                fontSize: '0.8125rem',
+                color: 'var(--text-muted)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.375rem',
+              }}
+            >
+              <CheckCircle2 size={14} color="var(--accent-olive)" />
+              Secure checkout · Instant download · Lifetime access
+            </p>
           </div>
         </div>
 

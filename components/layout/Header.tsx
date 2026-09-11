@@ -88,7 +88,7 @@ export const Header: React.FC = () => {
         position: 'sticky',
         top: 0,
         zIndex: mobileMenuOpen ? 10002 : 100,
-        backgroundColor: 'rgba(255, 253, 249, 0.95)',
+        backgroundColor: 'rgba(16, 14, 12, 0.92)',
         borderBottom: '1px solid var(--border-base)',
       }}
     >

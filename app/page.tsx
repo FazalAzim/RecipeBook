@@ -2,11 +2,19 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { BookOpen, ArrowRight, Flame } from 'lucide-react';
+import {
+  ArrowRight,
+  Download,
+  Infinity,
+  ShieldCheck,
+  ShoppingBag,
+  Sparkles,
+} from 'lucide-react';
 import { BookGrid } from '@/components/books/BookGrid';
 import { BookFilters } from '@/components/books/BookFilters';
 import { Button } from '@/components/common/Button';
 import { ErrorState } from '@/components/common/ErrorState';
+import { useCart } from '@/contexts/CartContext';
 import type { Book, FilterState } from '@/lib/types';
 
 const INITIAL_FILTERS: FilterState = {
@@ -19,9 +27,31 @@ const INITIAL_FILTERS: FilterState = {
 
 export default function HomePage() {
   const [books, setBooks] = useState<Book[]>([]);
+  const [featuredBook, setFeaturedBook] = useState<Book | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<FilterState>(INITIAL_FILTERS);
+  const { addItem, isInCart } = useCart();
+
+  useEffect(() => {
+    const loadFeatured = async () => {
+      try {
+        const res = await fetch('/api/books?sortBy=featured');
+        if (!res.ok) return;
+        const data = await res.json();
+        const list = (data.books || []) as Book[];
+        const preferred =
+          list.find((b) => b.featured) ||
+          list.find((b) => /dessert/i.test(b.title)) ||
+          list[0] ||
+          null;
+        setFeaturedBook(preferred);
+      } catch {
+        // Hero falls back to static cover
+      }
+    };
+    loadFeatured();
+  }, []);
 
   const fetchBooks = useCallback(async () => {
     setLoading(true);
@@ -40,9 +70,9 @@ export default function HomePage() {
       }
       const data = await res.json();
       setBooks(data.books || []);
-    } catch (err: any) {
-      console.error('Error loading books:', err);
-      setError(err.message || 'Failed to fetch cookbooks from database.');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to fetch cookbooks from database.';
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -56,22 +86,38 @@ export default function HomePage() {
     setFilters(INITIAL_FILTERS);
   };
 
+  // Marketing hero always uses the curated Dessert Dreams cover asset
+  const heroCover = '/books/dessert-dreams-cover.jpg?v=2';
+  const heroTitle = featuredBook?.title || 'Desserts Dreams';
+  const heroAuthor = featuredBook?.author || 'Wellness Jar';
+  const heroPrice = featuredBook?.price ?? 19.99;
+  const heroInCart = featuredBook ? isInCart(featuredBook.id) : false;
+
+  const handleHeroBuy = () => {
+    if (!featuredBook) {
+      document.getElementById('cookbook-catalog')?.scrollIntoView({ behavior: 'smooth' });
+      return;
+    }
+    addItem(featuredBook, 1);
+  };
+
   return (
     <div>
       {/* Hero Section */}
       <section
+        className="hero-section"
         style={{
-          background: 'linear-gradient(180deg, #FFF8F0 0%, var(--bg-app) 100%)',
-          padding: '2.5rem 0 3rem',
+          background:
+            'radial-gradient(ellipse at top right, rgba(240, 106, 34, 0.18) 0%, transparent 48%), linear-gradient(180deg, #161210 0%, var(--bg-app) 100%)',
+          padding: '2.5rem 0 2.75rem',
           borderBottom: '1px solid var(--border-light)',
           position: 'relative',
           overflow: 'hidden',
         }}
-        className="hero-section"
       >
         <div
           className="container hero-grid"
-          style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '3rem', alignItems: 'center' }}
+          style={{ display: 'grid', gridTemplateColumns: '1.15fr 0.95fr', gap: '2.75rem', alignItems: 'center' }}
         >
           <div>
             <div
@@ -90,40 +136,55 @@ export default function HomePage() {
                 maxWidth: '100%',
               }}
             >
-              <Flame size={16} color="var(--primary)" style={{ flexShrink: 0 }} />
-              <span>Chef-Crafted Digital Cookbooks in PDF</span>
+              <Sparkles size={15} color="var(--primary)" style={{ flexShrink: 0 }} />
+              <span>Instant download · Lifetime access</span>
             </div>
 
-            <h1 style={{ marginBottom: '1rem', color: 'var(--text-primary)', lineHeight: 1.15 }}>
-              Master Authentic Cuisines with <span style={{ color: 'var(--primary)' }}>Instant PDF</span> Cookbooks.
+            <h1 style={{ marginBottom: '1rem', color: 'var(--text-primary)', lineHeight: 1.12 }}>
+              Cook beautiful desserts at home with{' '}
+              <span style={{ color: 'var(--primary)' }}>ready-to-follow</span> recipe books.
             </h1>
 
             <p
               style={{
-                fontSize: '1rem',
+                fontSize: '1.0625rem',
                 color: 'var(--text-secondary)',
                 marginBottom: '1.5rem',
-                lineHeight: 1.6,
+                lineHeight: 1.65,
                 maxWidth: '540px',
               }}
             >
-              Explore chef-curated recipe guides, authentic global secret techniques, and printable weeknight meal plans. Buy once, download instantly, keep forever.
+              Chef-crafted digital cookbooks you can open on your phone, tablet, or print for the kitchen.
+              Buy once, download instantly, keep forever.
             </p>
 
-            <div className="hero-cta-row" style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}>
+            <div
+              className="hero-cta-row"
+              style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'center' }}
+            >
               <a href="#cookbook-catalog" style={{ flex: '1 1 auto', minWidth: 'min(100%, 180px)' }}>
                 <Button variant="primary" size="lg" fullWidth rightIcon={<ArrowRight size={18} />}>
-                  Explore Cookbooks
+                  Browse Cookbooks
                 </Button>
               </a>
-              <Link href="/library" style={{ flex: '1 1 auto', minWidth: 'min(100%, 140px)' }}>
-                <Button variant="secondary" size="lg" fullWidth leftIcon={<BookOpen size={18} />}>
-                  My Library
-                </Button>
-              </Link>
+              {featuredBook ? (
+                <Link
+                  href={`/books/${featuredBook.id}`}
+                  style={{ flex: '1 1 auto', minWidth: 'min(100%, 160px)' }}
+                >
+                  <Button variant="secondary" size="lg" fullWidth>
+                    See What&apos;s Inside
+                  </Button>
+                </Link>
+              ) : (
+                <a href="#cookbook-catalog" style={{ flex: '1 1 auto', minWidth: 'min(100%, 160px)' }}>
+                  <Button variant="secondary" size="lg" fullWidth>
+                    See What&apos;s Inside
+                  </Button>
+                </a>
+              )}
             </div>
 
-            {/* Quick stats ribbon */}
             <div
               className="hero-stats"
               style={{
@@ -136,68 +197,141 @@ export default function HomePage() {
               }}
             >
               <div>
-                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-primary)' }}>100%</div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Tested Recipes</div>
+                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-primary)' }}>Buy once</div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>No subscriptions</div>
               </div>
               <div>
                 <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-primary)' }}>Instant</div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>PDF Downloads</div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>PDF after payment</div>
               </div>
               <div>
                 <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-primary)' }}>Lifetime</div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Library Access</div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Library access</div>
               </div>
             </div>
           </div>
 
-          {/* Hero Visual Showcase */}
+          {/* Featured book sales card */}
           <div style={{ position: 'relative' }} className="hero-image-wrap">
             <div
-              className="surface-card"
+              className="surface-card hero-feature-card"
               style={{
-                padding: '1.25rem',
-                transform: 'rotate(-2deg)',
+                padding: '1rem',
                 backgroundColor: 'var(--bg-surface)',
                 boxShadow: 'var(--shadow-xl)',
                 position: 'relative',
                 zIndex: 2,
+                border: '1px solid var(--border-light)',
               }}
             >
-              <img
-                src="/books/chocolate-mousse-cake-cover.png"
-                alt="Velvet Chocolate Mousse Cake Masterclass"
-                className="hero-cover-img"
+              <div
                 style={{
                   borderRadius: 'var(--radius-md)',
-                  width: '100%',
-                  height: '320px',
-                  objectFit: 'cover',
+                  overflow: 'hidden',
+                  backgroundColor: '#1a1a1a',
                 }}
-              />
-              <div
-                className="hero-cover-meta"
-                style={{ marginTop: '0.875rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.75rem' }}
               >
-                <div style={{ minWidth: 0 }}>
-                  <h4 style={{ fontSize: '0.9375rem', margin: 0 }}>Velvet Chocolate Mousse Cake</h4>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Pastry Chef Claire Dupont • 111 Pages PDF</span>
+                <img
+                  src={heroCover}
+                  alt={heroTitle}
+                  className="hero-cover-img"
+                  style={{
+                    width: '100%',
+                    height: '340px',
+                    objectFit: 'contain',
+                    objectPosition: 'center',
+                    display: 'block',
+                  }}
+                />
+              </div>
+
+              <div style={{ padding: '0.875rem 0.25rem 0.25rem' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'flex-start',
+                    gap: '0.75rem',
+                    marginBottom: '0.75rem',
+                  }}
+                >
+                  <div style={{ minWidth: 0 }}>
+                    <div
+                      style={{
+                        fontSize: '0.6875rem',
+                        fontWeight: 700,
+                        color: 'var(--primary)',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.04em',
+                        marginBottom: '0.25rem',
+                      }}
+                    >
+                      Featured cookbook
+                    </div>
+                    <h3
+                      className="hero-cover-meta"
+                      style={{ fontSize: '1.125rem', margin: 0, lineHeight: 1.25 }}
+                    >
+                      {heroTitle}
+                    </h3>
+                    <span style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>
+                      By {heroAuthor}
+                      {featuredBook?.pageCount ? ` · ${featuredBook.pageCount} pages` : ''}
+                    </span>
+                  </div>
+                  <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                    <div
+                      style={{
+                        fontSize: '1.375rem',
+                        fontWeight: 800,
+                        color: 'var(--primary-dark)',
+                        fontFamily: 'var(--font-heading)',
+                        lineHeight: 1,
+                      }}
+                    >
+                      ${heroPrice.toFixed(2)}
+                    </div>
+                    <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+                      Instant PDF
+                    </div>
+                  </div>
                 </div>
-                <span className="badge badge-pdf" style={{ flexShrink: 0 }}>PDF</span>
+
+                <div style={{ display: 'grid', gridTemplateColumns: featuredBook ? '1fr 1.15fr' : '1fr', gap: '0.5rem' }}>
+                  {featuredBook && (
+                    <Link href={`/books/${featuredBook.id}`}>
+                      <Button variant="secondary" fullWidth>
+                        Details
+                      </Button>
+                    </Link>
+                  )}
+                  <Button
+                    variant="primary"
+                    fullWidth
+                    leftIcon={<ShoppingBag size={16} />}
+                    onClick={handleHeroBuy}
+                  >
+                    {featuredBook
+                      ? heroInCart
+                        ? 'Add Another'
+                        : 'Add to Cart'
+                      : 'Browse Books'}
+                  </Button>
+                </div>
               </div>
             </div>
 
-            {/* Backing decorative card */}
             <div
               style={{
                 position: 'absolute',
-                top: '20px',
-                right: '-15px',
+                top: '18px',
+                right: '-12px',
                 width: '100%',
                 height: '100%',
                 backgroundColor: 'var(--secondary-light)',
                 borderRadius: 'var(--radius-lg)',
-                border: '1px solid #FDE68A',
-                transform: 'rotate(4deg)',
+                border: '1px solid var(--primary-border)',
+                transform: 'rotate(3deg)',
                 zIndex: 1,
               }}
               className="hero-decorative-card"
@@ -212,32 +346,101 @@ export default function HomePage() {
               gap: 1.5rem !important;
             }
             .hero-image-wrap {
-              max-width: 100%;
+              max-width: 420px;
               margin: 0 auto;
               width: 100%;
+            }
+            .hero-feature-card {
+              transform: none !important;
             }
           }
           @media (max-width: 767px) {
             .hero-cover-img {
-              height: min(52vw, 240px) !important;
-            }
-            .hero-cover-meta h4 {
-              font-size: 0.875rem !important;
-              white-space: nowrap;
-              overflow: hidden;
-              text-overflow: ellipsis;
+              height: min(58vw, 280px) !important;
             }
           }
         `}</style>
       </section>
 
-      {/* Catalog & Filter Section */}
-      <section className="page-section catalog-section" style={{ padding: '2.5rem 0 4rem' }} id="cookbook-catalog-section">
+      {/* Trust strip */}
+      <section
+        className="trust-strip"
+        style={{
+          backgroundColor: 'var(--bg-surface)',
+          borderBottom: '1px solid var(--border-light)',
+          padding: '1.25rem 0',
+        }}
+      >
+        <div
+          className="container trust-strip-grid"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+            gap: '1rem',
+          }}
+        >
+          {[
+            {
+              icon: <Download size={18} color="var(--primary)" />,
+              title: 'Instant PDF',
+              text: 'Download right after checkout',
+            },
+            {
+              icon: <Infinity size={18} color="var(--accent-olive)" />,
+              title: 'Lifetime access',
+              text: 'Re-download anytime from your library',
+            },
+            {
+              icon: <ShieldCheck size={18} color="var(--secondary)" />,
+              title: 'Secure checkout',
+              text: 'Protected payments via Lemon Squeezy',
+            },
+          ].map((item) => (
+            <div
+              key={item.title}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.75rem',
+                minWidth: 0,
+              }}
+            >
+              <div
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 'var(--radius-md)',
+                  backgroundColor: 'var(--bg-subtle)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                }}
+              >
+                {item.icon}
+              </div>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontWeight: 700, fontSize: '0.875rem', color: 'var(--text-primary)' }}>
+                  {item.title}
+                </div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{item.text}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Catalog */}
+      <section
+        className="page-section catalog-section"
+        style={{ padding: '2.5rem 0 4rem' }}
+        id="cookbook-catalog-section"
+      >
         <div className="container">
           <div className="catalog-heading" style={{ marginBottom: '1.25rem' }}>
-            <h2 style={{ fontSize: '1.75rem', marginBottom: '0.25rem' }}>Explore Digital Recipe Books</h2>
+            <h2 style={{ fontSize: '1.75rem', marginBottom: '0.25rem' }}>Start with these cookbooks</h2>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.9375rem' }}>
-              Handpicked step-by-step masterclasses formatted for easy reading on kitchen tablets and phones.
+              Beautiful, step-by-step recipe books formatted for phones, tablets, and printing.
             </p>
           </div>
 
@@ -255,6 +458,15 @@ export default function HomePage() {
           )}
         </div>
       </section>
+
+      <style>{`
+        @media (max-width: 767px) {
+          .trust-strip-grid {
+            grid-template-columns: 1fr !important;
+            gap: 0.875rem !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }

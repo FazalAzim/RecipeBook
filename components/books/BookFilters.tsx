@@ -195,8 +195,8 @@ export const BookFilters: React.FC<BookFiltersProps> = ({
                   padding: '0.375rem 0.7rem',
                   borderRadius: 'var(--radius-pill)',
                   backgroundColor: isSelected ? 'var(--secondary-light)' : 'var(--bg-surface)',
-                  color: isSelected ? '#92400E' : 'var(--text-secondary)',
-                  border: isSelected ? '1px solid #FDE68A' : '1px solid var(--border-light)',
+                  color: isSelected ? '#FBBF24' : 'var(--text-secondary)',
+                  border: isSelected ? '1px solid rgba(232, 163, 23, 0.35)' : '1px solid var(--border-light)',
                   fontWeight: isSelected ? 700 : 500,
                   cursor: 'pointer',
                 }}
