@@ -22,7 +22,7 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { user, logout } = useAuth();
+  const { user, logout, loading, isAdmin } = useAuth();
   const { showToast } = useToast();
   const router = useRouter();
   const pathname = usePathname() || '';
@@ -32,8 +32,23 @@ export default function AdminLayout({
     setMobileNavOpen(false);
   }, [pathname]);
 
+  useEffect(() => {
+    if (pathname === '/admin/login' || loading) return;
+    if (!user || !isAdmin) {
+      router.replace('/admin/login?error=access_denied');
+    }
+  }, [pathname, loading, user, isAdmin, router]);
+
   if (pathname === '/admin/login') {
     return <>{children}</>;
+  }
+
+  if (loading || !user || !isAdmin) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', background: 'var(--background)' }}>
+        <p style={{ color: 'var(--muted)' }}>Checking admin access…</p>
+      </div>
+    );
   }
 
   const handleLogout = async () => {

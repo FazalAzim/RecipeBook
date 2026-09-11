@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs';
 import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
 import type { UserProfile, UserRole } from './types';
+import { findUserById } from './db/users';
 
 const AUTH_SECRET = process.env.AUTH_SECRET || 'dev_secret_fallback_key_at_least_32_characters_long_12345';
 const secretKey = new TextEncoder().encode(AUTH_SECRET);
@@ -59,7 +60,8 @@ export async function verifySessionToken(token: string): Promise<SessionPayload 
 }
 
 /**
- * Gets the current authenticated session user from request cookies
+ * Gets the current authenticated session user from request cookies.
+ * Always re-checks MongoDB so deleted users / role changes invalidate access.
  */
 export async function getSessionUser(): Promise<UserProfile | null> {
   try {
@@ -68,13 +70,17 @@ export async function getSessionUser(): Promise<UserProfile | null> {
     if (!token) return null;
 
     const payload = await verifySessionToken(token);
-    if (!payload) return null;
+    if (!payload?.id) return null;
+
+    const dbUser = await findUserById(payload.id);
+    if (!dbUser) return null;
 
     return {
-      id: payload.id,
-      email: payload.email,
-      name: payload.name,
-      role: payload.role,
+      id: dbUser.id,
+      email: dbUser.email,
+      name: dbUser.name,
+      role: dbUser.role,
+      createdAt: dbUser.createdAt,
     };
   } catch {
     return null;
