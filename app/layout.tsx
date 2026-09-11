@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Script from 'next/script';
 import './globals.css';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { CartProvider } from '@/contexts/CartContext';
@@ -34,6 +35,12 @@ export default function RootLayout({
         />
       </head>
       <body>
+        <Script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4291207946566587"
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+        />
         <ToastProvider>
           <AuthProvider>
             <CartProvider>
