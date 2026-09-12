@@ -15,8 +15,6 @@ import {
   Search,
   AlertTriangle,
   FileText,
-  Sparkles,
-  Users,
 } from 'lucide-react';
 import { useToast } from '@/contexts/ToastContext';
 import { Button } from '@/components/common/Button';
@@ -24,6 +22,7 @@ import { Badge } from '@/components/common/Badge';
 import { Modal } from '@/components/common/Modal';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { EmptyState } from '@/components/common/EmptyState';
+import { VisitorsAnalyticsPanel, type VisitDayPoint } from '@/components/admin/VisitorsAnalyticsPanel';
 import type { Book, Order } from '@/lib/types';
 
 export default function AdminDashboardPage() {
@@ -39,6 +38,7 @@ export default function AdminDashboardPage() {
     uniqueVisitorsAllTime: 0,
     uniqueVisitorsLast7Days: 0,
     uniqueVisitorsToday: 0,
+    series: [] as VisitDayPoint[],
   });
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -80,6 +80,7 @@ export default function AdminDashboardPage() {
             uniqueVisitorsAllTime: 0,
             uniqueVisitorsLast7Days: 0,
             uniqueVisitorsToday: 0,
+            series: [],
           }
         );
       }
@@ -277,59 +278,16 @@ export default function AdminDashboardPage() {
             <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-primary)' }}>{stats.totalOrders}</div>
           </div>
         </div>
-
-        <div className="surface-card" style={{ padding: '1.5rem', display: 'flex', gap: '1rem', alignItems: 'center' }}>
-          <div
-            style={{
-              width: '48px',
-              height: '48px',
-              borderRadius: 'var(--radius-md)',
-              backgroundColor: 'var(--primary-light)',
-              color: 'var(--primary)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <Eye size={24} />
-          </div>
-          <div>
-            <div style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>Page Views</div>
-            <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-primary)' }}>
-              {stats.pageViewsAllTime}
-            </div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>
-              Today: {stats.pageViewsToday}
-            </div>
-          </div>
-        </div>
-
-        <div className="surface-card" style={{ padding: '1.5rem', display: 'flex', gap: '1rem', alignItems: 'center' }}>
-          <div
-            style={{
-              width: '48px',
-              height: '48px',
-              borderRadius: 'var(--radius-md)',
-              backgroundColor: 'var(--accent-olive-light)',
-              color: 'var(--accent-olive)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <Users size={24} />
-          </div>
-          <div>
-            <div style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>Unique Visitors</div>
-            <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-primary)' }}>
-              {stats.uniqueVisitorsAllTime}
-            </div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>
-              Last 7 days: {stats.uniqueVisitorsLast7Days} · Today: {stats.uniqueVisitorsToday}
-            </div>
-          </div>
-        </div>
       </div>
+
+      <VisitorsAnalyticsPanel
+        pageViewsAllTime={stats.pageViewsAllTime}
+        pageViewsToday={stats.pageViewsToday}
+        uniqueVisitorsAllTime={stats.uniqueVisitorsAllTime}
+        uniqueVisitorsLast7Days={stats.uniqueVisitorsLast7Days}
+        uniqueVisitorsToday={stats.uniqueVisitorsToday}
+        series={stats.series || []}
+      />
 
       {/* Main Table: Cookbook Catalog Management */}
       <div className="surface-card" style={{ padding: '1.5rem', backgroundColor: 'var(--bg-surface)', marginBottom: '2.5rem' }}>

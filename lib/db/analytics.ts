@@ -14,6 +14,16 @@ export interface VisitStats {
   uniqueVisitorsToday: number;
 }
 
+export interface VisitDayPoint {
+  date: string;
+  pageViews: number;
+  uniqueVisitors: number;
+}
+
+export interface VisitStatsWithSeries extends VisitStats {
+  series: VisitDayPoint[];
+}
+
 /** In-memory fallback when MongoDB is unavailable. */
 const inMemoryDaily: Map<string, DailyPageViewDoc> = new Map();
 
@@ -97,13 +107,14 @@ function aggregateDocs(docs: DailyPageViewDoc[]): VisitStats {
   };
 }
 
-export async function getVisitStats(): Promise<VisitStats> {
-  const empty: VisitStats = {
+export async function getVisitStats(seriesDays = 30): Promise<VisitStatsWithSeries> {
+  const empty: VisitStatsWithSeries = {
     pageViewsAllTime: 0,
     pageViewsToday: 0,
     uniqueVisitorsAllTime: 0,
     uniqueVisitorsLast7Days: 0,
     uniqueVisitorsToday: 0,
+    series: buildSeries([], seriesDays),
   };
 
   const db = await getDb();
@@ -114,12 +125,38 @@ export async function getVisitStats(): Promise<VisitStats> {
         .find({})
         .project({ date: 1, pageViews: 1, visitorIds: 1 })
         .toArray();
-      return aggregateDocs(docs as DailyPageViewDoc[]);
+      const typed = docs as DailyPageViewDoc[];
+      return {
+        ...aggregateDocs(typed),
+        series: buildSeries(typed, seriesDays),
+      };
     } catch (err) {
       console.warn('Error loading visit stats:', err);
       return empty;
     }
   }
 
-  return aggregateDocs(Array.from(inMemoryDaily.values()));
+  const memDocs = Array.from(inMemoryDaily.values());
+  return {
+    ...aggregateDocs(memDocs),
+    series: buildSeries(memDocs, seriesDays),
+  };
+}
+
+/** Fill last N UTC days so charts have continuous X-axis. */
+function buildSeries(docs: DailyPageViewDoc[], days: number): VisitDayPoint[] {
+  const byDate = new Map(docs.map((d) => [d.date, d]));
+  const series: VisitDayPoint[] = [];
+
+  for (let i = days - 1; i >= 0; i--) {
+    const date = daysAgoUtc(i);
+    const doc = byDate.get(date);
+    series.push({
+      date,
+      pageViews: doc?.pageViews || 0,
+      uniqueVisitors: doc?.visitorIds?.length || 0,
+    });
+  }
+
+  return series;
 }
