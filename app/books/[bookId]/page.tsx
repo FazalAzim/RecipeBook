@@ -20,6 +20,7 @@ import { Badge } from '@/components/common/Badge';
 import { QuantitySelector } from '@/components/books/QuantitySelector';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { ErrorState } from '@/components/common/ErrorState';
+import { AdSenseDisplayAd } from '@/components/ads/AdSenseDisplayAd';
 import type { Book } from '@/lib/types';
 
 export default function BookDetailPage({
@@ -372,6 +373,10 @@ export default function BookDetailPage({
               Secure checkout · Instant download · Lifetime access
             </p>
           </div>
+        </div>
+
+        <div style={{ marginTop: '2.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border-light)' }}>
+          <AdSenseDisplayAd />
         </div>
 
         <style>{`

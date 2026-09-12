@@ -14,6 +14,7 @@ import { BookGrid } from '@/components/books/BookGrid';
 import { BookFilters } from '@/components/books/BookFilters';
 import { Button } from '@/components/common/Button';
 import { ErrorState } from '@/components/common/ErrorState';
+import { AdSenseDisplayAd } from '@/components/ads/AdSenseDisplayAd';
 import { useCart } from '@/contexts/CartContext';
 import type { Book, FilterState } from '@/lib/types';
 
@@ -456,6 +457,16 @@ export default function HomePage() {
           ) : (
             <BookGrid books={books} loading={loading} onResetFilters={handleResetFilters} />
           )}
+        </div>
+      </section>
+
+      <section
+        className="page-section"
+        style={{ padding: '0 0 3rem' }}
+        aria-label="Sponsored"
+      >
+        <div className="container">
+          <AdSenseDisplayAd />
         </div>
       </section>
 
