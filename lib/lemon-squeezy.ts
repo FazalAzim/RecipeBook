@@ -125,7 +125,7 @@ export async function createLemonSqueezyCheckout(params: {
 
   const coverImages = params.items
     .map((item) => item.coverImageUrl)
-    .filter((url): url is string => Boolean(url) && url.length <= 255)
+    .filter((url): url is string => typeof url === 'string' && url.length > 0 && url.length <= 255)
     .slice(0, 3);
 
   const response = await lemonSqueezyRequest<LemonSqueezyApiResponse<LemonSqueezyCheckoutData>>(
