@@ -128,6 +128,12 @@ export async function createLemonSqueezyCheckout(params: {
     .filter((url): url is string => typeof url === 'string' && url.length > 0 && url.length <= 255)
     .slice(0, 3);
 
+  if (coverImages.length === 0) {
+    console.warn('Lemon Squeezy checkout created without product media (no cover URL ≤255 chars).');
+  } else {
+    console.info('Lemon Squeezy checkout media:', coverImages);
+  }
+
   const response = await lemonSqueezyRequest<LemonSqueezyApiResponse<LemonSqueezyCheckoutData>>(
     '/checkouts',
     {

@@ -214,7 +214,7 @@ export async function getR2PresignedDownloadUrl(
 
 /**
  * Short cover URL for Lemon Squeezy (media URLs must be ≤ 255 chars).
- * Resolves via /api/cover/[bookId] → CDN or signed R2 redirect.
+ * Points at /api/cover/[bookId] which streams image bytes (no redirect).
  */
 export function buildCheckoutCoverUrl(bookId: string, appOrigin: string): string | undefined {
   const base = (process.env.NEXT_PUBLIC_APP_URL || appOrigin || '')
@@ -222,7 +222,9 @@ export function buildCheckoutCoverUrl(bookId: string, appOrigin: string): string
     .replace(/\/$/, '');
   if (!base || !bookId) return undefined;
 
-  const url = `${base}/api/cover/${encodeURIComponent(bookId)}`;
+  // Prefer https for Lemon Squeezy servers to fetch the image
+  const secureBase = base.replace(/^http:\/\//i, 'https://');
+  const url = `${secureBase}/api/cover/${encodeURIComponent(bookId)}.jpg`;
   if (url.length > 255) return undefined;
   return url;
 }
