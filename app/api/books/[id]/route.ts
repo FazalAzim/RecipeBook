@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDbBookById, updateDbBook, deleteDbBook } from '@/lib/db/books';
 import { getSessionUser } from '@/lib/auth';
+import { parseCompareAtPrice } from '@/lib/pricing';
 
 export async function GET(
   _req: NextRequest,
@@ -39,6 +40,31 @@ export async function PUT(
 
     const { id } = await params;
     const updates = await req.json();
+
+    if ('compareAtPrice' in updates || 'price' in updates) {
+      const existing = await getDbBookById(id);
+      if (!existing) {
+        return NextResponse.json({ error: 'Book not found.' }, { status: 404 });
+      }
+
+      const nextPrice =
+        updates.price != null ? Number(updates.price) : Number(existing.price);
+      const nextCompare =
+        'compareAtPrice' in updates
+          ? parseCompareAtPrice(updates.compareAtPrice)
+          : existing.compareAtPrice;
+
+      if (nextCompare != null && nextCompare <= nextPrice) {
+        return NextResponse.json(
+          { error: 'Original (compare-at) price must be higher than the sale price.' },
+          { status: 400 }
+        );
+      }
+
+      if ('compareAtPrice' in updates) {
+        updates.compareAtPrice = nextCompare;
+      }
+    }
 
     const updated = await updateDbBook(id, updates);
     if (!updated) {

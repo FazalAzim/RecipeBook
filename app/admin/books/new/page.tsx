@@ -28,6 +28,7 @@ export default function AdminNewBookPage() {
   const [cuisine, setCuisine] = useState(CUISINES[1] || 'Italian');
   const [tagsInput, setTagsInput] = useState('');
   const [price, setPrice] = useState('19.99');
+  const [compareAtPrice, setCompareAtPrice] = useState('');
   const [pageCount, setPageCount] = useState('120');
   const [isPublished, setIsPublished] = useState(true);
   const [isFeatured, setIsFeatured] = useState(false);
@@ -109,6 +110,12 @@ export default function AdminNewBookPage() {
     if (!author.trim()) errors.author = 'Author name is required.';
     if (!description.trim()) errors.description = 'Cookbook description is required.';
     if (!price || isNaN(Number(price)) || Number(price) <= 0) errors.price = 'Please enter a valid price.';
+    if (
+      compareAtPrice.trim() &&
+      (isNaN(Number(compareAtPrice)) || Number(compareAtPrice) <= Number(price))
+    ) {
+      errors.compareAtPrice = 'Original price must be higher than the sale price.';
+    }
     if (!pageCount || isNaN(Number(pageCount)) || Number(pageCount) < 1) errors.pageCount = 'Page count must be >= 1.';
     if (!pdfFile) errors.pdf = 'A cookbook PDF is required before publishing.';
 
@@ -161,6 +168,7 @@ export default function AdminNewBookPage() {
           cuisine,
           tags,
           price: Number(price),
+          compareAtPrice: compareAtPrice.trim() ? Number(compareAtPrice) : undefined,
           pageCount: Number(pageCount),
           coverImageUrl,
           pdfFileUrl,
@@ -313,16 +321,26 @@ export default function AdminNewBookPage() {
             2. Pricing & Publication Settings
           </h3>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }} className="stack-sm">
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1.25rem' }} className="stack-sm">
             <Input
-              label="Price (USD)"
+              label="Sale Price (USD)"
               type="number"
               step="0.01"
               required
-              placeholder="19.99"
+              placeholder="9.99"
               value={price}
               onChange={(e) => setPrice(e.target.value)}
               error={formErrors.price}
+            />
+
+            <Input
+              label="Original Price (optional)"
+              type="number"
+              step="0.01"
+              placeholder="19.99"
+              value={compareAtPrice}
+              onChange={(e) => setCompareAtPrice(e.target.value)}
+              error={formErrors.compareAtPrice}
             />
 
             <Input
@@ -335,6 +353,9 @@ export default function AdminNewBookPage() {
               error={formErrors.pageCount}
             />
           </div>
+          <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>
+            Set an original price higher than the sale price to show a % OFF offer label on the storefront.
+          </p>
 
           <div style={{ display: 'flex', gap: '2rem', marginTop: '1.25rem', flexWrap: 'wrap' }}>
             <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>

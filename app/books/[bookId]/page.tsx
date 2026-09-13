@@ -21,6 +21,7 @@ import { QuantitySelector } from '@/components/books/QuantitySelector';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { ErrorState } from '@/components/common/ErrorState';
 import { AdSenseDisplayAd } from '@/components/ads/AdSenseDisplayAd';
+import { getOffer } from '@/lib/pricing';
 import type { Book } from '@/lib/types';
 
 export default function BookDetailPage({
@@ -93,6 +94,8 @@ export default function BookDetailPage({
       </div>
     );
   }
+
+  const offer = getOffer(book);
 
   return (
     <div style={{ padding: '1.5rem 0 3rem' }} className="book-detail-page">
@@ -253,19 +256,57 @@ export default function BookDetailPage({
                 display: 'flex',
                 alignItems: 'baseline',
                 justifyContent: 'space-between',
+                gap: '1rem',
+                flexWrap: 'wrap',
               }}
             >
               <div>
                 <span style={{ fontSize: '0.8125rem', color: 'var(--primary-dark)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                  Single Complete Edition
+                  {offer ? `${offer.percentOff}% Off — Limited Offer` : 'Single Complete Edition'}
                 </span>
-                <div style={{ fontSize: '2.25rem', fontWeight: 800, color: 'var(--primary-dark)', fontFamily: 'var(--font-heading)' }}>
-                  ${book.price.toFixed(2)}
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.65rem', flexWrap: 'wrap' }}>
+                  <div style={{ fontSize: '2.25rem', fontWeight: 800, color: 'var(--primary-dark)', fontFamily: 'var(--font-heading)' }}>
+                    ${book.price.toFixed(2)}
+                  </div>
+                  {offer && (
+                    <span
+                      style={{
+                        fontSize: '1.125rem',
+                        color: 'var(--text-muted)',
+                        textDecoration: 'line-through',
+                        fontWeight: 600,
+                      }}
+                    >
+                      ${offer.compareAtPrice.toFixed(2)}
+                    </span>
+                  )}
                 </div>
+                {offer && (
+                  <div style={{ fontSize: '0.8125rem', color: 'var(--accent-olive)', fontWeight: 600, marginTop: '0.25rem' }}>
+                    You save ${(offer.compareAtPrice - offer.price).toFixed(2)}
+                  </div>
+                )}
               </div>
 
               <div style={{ textAlign: 'right' }}>
-                <span className="badge badge-success">Instant Delivery</span>
+                {offer ? (
+                  <span
+                    style={{
+                      display: 'inline-block',
+                      backgroundColor: 'var(--primary)',
+                      color: '#fff',
+                      fontSize: '0.75rem',
+                      fontWeight: 800,
+                      padding: '0.35rem 0.65rem',
+                      borderRadius: 'var(--radius-pill)',
+                      letterSpacing: '0.03em',
+                    }}
+                  >
+                    {offer.percentOff}% OFF
+                  </span>
+                ) : (
+                  <span className="badge badge-success">Instant Delivery</span>
+                )}
                 <div style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
                   PDF • {book.fileSize}
                 </div>

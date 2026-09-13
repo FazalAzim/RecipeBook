@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { ShoppingBag, Star } from 'lucide-react';
 import { Button } from '../common/Button';
 import { useCart } from '@/contexts/CartContext';
+import { getOffer } from '@/lib/pricing';
 import type { Book } from '@/lib/types';
 
 export interface BookCardProps {
@@ -14,6 +15,7 @@ export interface BookCardProps {
 export const BookCard: React.FC<BookCardProps> = ({ book }) => {
   const { addItem, isInCart } = useCart();
   const inCart = isInCart(book.id);
+  const offer = getOffer(book);
 
   const benefitLine =
     book.description?.trim().split(/[.!?\n]/).filter(Boolean)[0]?.trim() ||
@@ -34,7 +36,6 @@ export const BookCard: React.FC<BookCardProps> = ({ book }) => {
         backgroundColor: 'var(--bg-surface)',
       }}
     >
-      {/* Clean cover — no overlay badges so artwork sells the book */}
       <Link
         href={`/books/${book.id}`}
         className="book-card-cover"
@@ -62,6 +63,25 @@ export const BookCard: React.FC<BookCardProps> = ({ book }) => {
             transition: 'transform 0.4s ease',
           }}
         />
+        {offer && (
+          <span
+            style={{
+              position: 'absolute',
+              top: '0.625rem',
+              right: '0.625rem',
+              backgroundColor: 'var(--primary)',
+              color: '#FFFFFF',
+              fontSize: '0.6875rem',
+              fontWeight: 800,
+              padding: '0.3rem 0.55rem',
+              borderRadius: 'var(--radius-pill)',
+              letterSpacing: '0.03em',
+              boxShadow: '0 4px 12px rgba(240, 106, 34, 0.35)',
+            }}
+          >
+            {offer.percentOff}% OFF
+          </span>
+        )}
         {book.featured && (
           <span
             style={{
@@ -159,21 +179,38 @@ export const BookCard: React.FC<BookCardProps> = ({ book }) => {
               alignItems: 'baseline',
               justifyContent: 'space-between',
               marginBottom: '0.75rem',
+              gap: '0.5rem',
             }}
           >
             <div>
-              <span
-                style={{
-                  fontSize: '1.375rem',
-                  fontWeight: 800,
-                  color: 'var(--primary-dark)',
-                  fontFamily: 'var(--font-heading)',
-                }}
-              >
-                ${book.price.toFixed(2)}
-              </span>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <span
+                  style={{
+                    fontSize: '1.375rem',
+                    fontWeight: 800,
+                    color: 'var(--primary-dark)',
+                    fontFamily: 'var(--font-heading)',
+                  }}
+                >
+                  ${book.price.toFixed(2)}
+                </span>
+                {offer && (
+                  <span
+                    style={{
+                      fontSize: '0.875rem',
+                      color: 'var(--text-muted)',
+                      textDecoration: 'line-through',
+                      fontWeight: 600,
+                    }}
+                  >
+                    ${offer.compareAtPrice.toFixed(2)}
+                  </span>
+                )}
+              </div>
               <span style={{ display: 'block', fontSize: '0.6875rem', color: 'var(--text-muted)' }}>
-                Instant download · {book.pageCount} pages
+                {offer
+                  ? `Offer · Save $${(offer.compareAtPrice - offer.price).toFixed(2)}`
+                  : `Instant download · ${book.pageCount} pages`}
               </span>
             </div>
           </div>

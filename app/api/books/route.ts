@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDbBooks, createDbBook } from '@/lib/db/books';
 import { getSessionUser } from '@/lib/auth';
+import { parseCompareAtPrice } from '@/lib/pricing';
 import type { FilterState } from '@/lib/types';
 
 export async function GET(req: NextRequest) {
@@ -49,6 +50,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const price = Number(bookData.price);
+    const compareAtPrice = parseCompareAtPrice(bookData.compareAtPrice);
+
+    if (compareAtPrice != null && compareAtPrice <= price) {
+      return NextResponse.json(
+        { error: 'Original (compare-at) price must be higher than the sale price.' },
+        { status: 400 }
+      );
+    }
+
     const requestedId =
       typeof bookData.id === 'string' && /^book-[a-zA-Z0-9_-]+$/.test(bookData.id.trim())
         ? bookData.id.trim()
@@ -56,20 +67,23 @@ export async function POST(req: NextRequest) {
 
     const newBook = await createDbBook(
       {
-      title: bookData.title.trim(),
-      author: bookData.author.trim(),
-      description: bookData.description || '',
-      category: bookData.category || 'General',
-      cuisine: bookData.cuisine || 'International',
-      tags: Array.isArray(bookData.tags) ? bookData.tags : [],
-      price: Number(bookData.price),
-      coverImageUrl: bookData.coverImageUrl || 'https://images.unsplash.com/photo-1495521821757-a1efb6729352?auto=format&fit=crop&w=800&q=80',
-      pdfFileUrl: bookData.pdfFileUrl || '',
-      pdfFileName: bookData.pdfFileName || `${bookData.title.replace(/\s+/g, '_')}.pdf`,
-      fileSize: bookData.fileSize || '5.0 MB',
-      pageCount: Number(bookData.pageCount || 100),
-      isPublished: Boolean(bookData.isPublished ?? true),
-      featured: Boolean(bookData.featured ?? false),
+        title: bookData.title.trim(),
+        author: bookData.author.trim(),
+        description: bookData.description || '',
+        category: bookData.category || 'General',
+        cuisine: bookData.cuisine || 'International',
+        tags: Array.isArray(bookData.tags) ? bookData.tags : [],
+        price,
+        ...(compareAtPrice != null ? { compareAtPrice } : {}),
+        coverImageUrl:
+          bookData.coverImageUrl ||
+          'https://images.unsplash.com/photo-1495521821757-a1efb6729352?auto=format&fit=crop&w=800&q=80',
+        pdfFileUrl: bookData.pdfFileUrl || '',
+        pdfFileName: bookData.pdfFileName || `${bookData.title.replace(/\s+/g, '_')}.pdf`,
+        fileSize: bookData.fileSize || '5.0 MB',
+        pageCount: Number(bookData.pageCount || 100),
+        isPublished: Boolean(bookData.isPublished ?? true),
+        featured: Boolean(bookData.featured ?? false),
       },
       requestedId ? { bookId: requestedId } : undefined
     );

@@ -52,6 +52,10 @@ function mapDocToBook(d: Record<string, unknown>): Book {
     cuisine: d.cuisine as string,
     tags: (d.tags || []) as string[],
     price: Number(d.price),
+    compareAtPrice:
+      d.compareAtPrice != null && Number(d.compareAtPrice) > 0
+        ? Number(d.compareAtPrice)
+        : undefined,
     coverImageUrl: resolveR2AssetUrl((d.coverImageUrl || '') as string),
     pdfFileUrl: (d.pdfFileUrl || '') as string,
     pdfFileName: (d.pdfFileName || '') as string,
@@ -155,20 +159,33 @@ export async function updateDbBook(bookId: string, updates: Partial<Book>): Prom
   const now = new Date();
   const db = await getDb();
 
+  const payload: Record<string, unknown> = { ...updates, updatedAt: now };
+  const unset: Record<string, ''> = {};
+
+  if ('compareAtPrice' in updates && (updates.compareAtPrice == null || Number(updates.compareAtPrice) <= 0)) {
+    delete payload.compareAtPrice;
+    unset.compareAtPrice = '';
+  }
+
   if (db && isMongoConfigured()) {
-    await db.collection('books').updateOne(
-      { id: bookId },
-      { $set: { ...updates, updatedAt: now } }
-    );
+    const mongoUpdate: Record<string, unknown> = { $set: payload };
+    if (Object.keys(unset).length > 0) {
+      mongoUpdate.$unset = unset;
+    }
+    await db.collection('books').updateOne({ id: bookId }, mongoUpdate);
   }
 
   const index = inMemoryBooks.findIndex((b) => b.id === bookId);
   if (index > -1) {
-    inMemoryBooks[index] = {
+    const next = {
       ...inMemoryBooks[index],
       ...updates,
       updatedAt: now.toISOString(),
     };
+    if ('compareAtPrice' in updates && (updates.compareAtPrice == null || Number(updates.compareAtPrice) <= 0)) {
+      delete next.compareAtPrice;
+    }
+    inMemoryBooks[index] = next;
   }
 
   return getDbBookById(bookId);

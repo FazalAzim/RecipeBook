@@ -16,6 +16,7 @@ import { Button } from '@/components/common/Button';
 import { ErrorState } from '@/components/common/ErrorState';
 import { AdSenseDisplayAd } from '@/components/ads/AdSenseDisplayAd';
 import { useCart } from '@/contexts/CartContext';
+import { getOffer } from '@/lib/pricing';
 import type { Book, FilterState } from '@/lib/types';
 
 const INITIAL_FILTERS: FilterState = {
@@ -92,6 +93,7 @@ export default function HomePage() {
   const heroTitle = featuredBook?.title || 'Desserts Dreams';
   const heroAuthor = featuredBook?.author || 'Wellness Jar';
   const heroPrice = featuredBook?.price ?? 19.99;
+  const heroOffer = featuredBook ? getOffer(featuredBook) : null;
   const heroInCart = featuredBook ? isInCart(featuredBook.id) : false;
 
   const handleHeroBuy = () => {
@@ -281,19 +283,50 @@ export default function HomePage() {
                     </span>
                   </div>
                   <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                    <div
-                      style={{
-                        fontSize: '1.375rem',
-                        fontWeight: 800,
-                        color: 'var(--primary-dark)',
-                        fontFamily: 'var(--font-heading)',
-                        lineHeight: 1,
-                      }}
-                    >
-                      ${heroPrice.toFixed(2)}
+                    {heroOffer && (
+                      <div
+                        style={{
+                          display: 'inline-block',
+                          backgroundColor: 'var(--primary)',
+                          color: '#fff',
+                          fontSize: '0.625rem',
+                          fontWeight: 800,
+                          padding: '0.2rem 0.45rem',
+                          borderRadius: 'var(--radius-pill)',
+                          marginBottom: '0.35rem',
+                          letterSpacing: '0.03em',
+                        }}
+                      >
+                        {heroOffer.percentOff}% OFF
+                      </div>
+                    )}
+                    <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'flex-end', gap: '0.4rem' }}>
+                      <div
+                        style={{
+                          fontSize: '1.375rem',
+                          fontWeight: 800,
+                          color: 'var(--primary-dark)',
+                          fontFamily: 'var(--font-heading)',
+                          lineHeight: 1,
+                        }}
+                      >
+                        ${heroPrice.toFixed(2)}
+                      </div>
+                      {heroOffer && (
+                        <span
+                          style={{
+                            fontSize: '0.8125rem',
+                            color: 'var(--text-muted)',
+                            textDecoration: 'line-through',
+                            fontWeight: 600,
+                          }}
+                        >
+                          ${heroOffer.compareAtPrice.toFixed(2)}
+                        </span>
+                      )}
                     </div>
                     <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-                      Instant PDF
+                      {heroOffer ? 'Limited offer · Instant PDF' : 'Instant PDF'}
                     </div>
                   </div>
                 </div>

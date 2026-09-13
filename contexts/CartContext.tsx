@@ -123,10 +123,14 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     (bookId: string) => {
       setItems((prevItems) => {
         const target = prevItems.find((i) => i.bookId === bookId);
+        const next = prevItems.filter((item) => item.bookId !== bookId);
         if (target) {
-          showToast(`Removed "${target.title}" from cart`, 'info');
+          // Never call showToast inside a setState updater (can run during render)
+          Promise.resolve().then(() => {
+            showToast(`Removed "${target.title}" from cart`, 'info');
+          });
         }
-        return prevItems.filter((item) => item.bookId !== bookId);
+        return next;
       });
     },
     [showToast]

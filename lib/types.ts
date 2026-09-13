@@ -17,6 +17,8 @@ export interface Book {
   cuisine: string;
   tags: string[];
   price: number;
+  /** Optional original price shown as strikethrough when higher than `price`. */
+  compareAtPrice?: number;
   coverImageUrl: string;
   pdfFileUrl: string;
   pdfFileName: string;

@@ -36,6 +36,7 @@ export default function AdminEditBookPage({
   const [cuisine, setCuisine] = useState('');
   const [tagsInput, setTagsInput] = useState('');
   const [price, setPrice] = useState('');
+  const [compareAtPrice, setCompareAtPrice] = useState('');
   const [pageCount, setPageCount] = useState('');
   const [isPublished, setIsPublished] = useState(true);
   const [isFeatured, setIsFeatured] = useState(false);
@@ -72,6 +73,7 @@ export default function AdminEditBookPage({
         setCuisine(book.cuisine);
         setTagsInput(book.tags ? book.tags.join(', ') : '');
         setPrice(book.price.toString());
+        setCompareAtPrice(book.compareAtPrice ? book.compareAtPrice.toString() : '');
         setPageCount(book.pageCount.toString());
         setIsPublished(book.isPublished);
         setIsFeatured(Boolean(book.featured));
@@ -121,6 +123,12 @@ export default function AdminEditBookPage({
     if (!author.trim()) errors.author = 'Author name is required.';
     if (!description.trim()) errors.description = 'Cookbook description is required.';
     if (!price || isNaN(Number(price)) || Number(price) <= 0) errors.price = 'Please enter a valid price.';
+    if (
+      compareAtPrice.trim() &&
+      (isNaN(Number(compareAtPrice)) || Number(compareAtPrice) <= Number(price))
+    ) {
+      errors.compareAtPrice = 'Original price must be higher than the sale price.';
+    }
     if (!pageCount || isNaN(Number(pageCount)) || Number(pageCount) < 1) errors.pageCount = 'Page count must be >= 1.';
 
     if (Object.keys(errors).length > 0) {
@@ -144,6 +152,7 @@ export default function AdminEditBookPage({
           .map((t) => t.trim())
           .filter((t) => t.length > 0),
         price: Number(price),
+        compareAtPrice: compareAtPrice.trim() ? Number(compareAtPrice) : undefined,
         pageCount: Number(pageCount),
         isPublished,
         featured: isFeatured,
@@ -302,15 +311,25 @@ export default function AdminEditBookPage({
             2. Pricing & Publication
           </h3>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }} className="stack-sm">
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1.25rem' }} className="stack-sm">
             <Input
-              label="Price (USD)"
+              label="Sale Price (USD)"
               type="number"
               step="0.01"
               required
               value={price}
               onChange={(e) => setPrice(e.target.value)}
               error={formErrors.price}
+            />
+
+            <Input
+              label="Original Price (optional)"
+              type="number"
+              step="0.01"
+              placeholder="19.99"
+              value={compareAtPrice}
+              onChange={(e) => setCompareAtPrice(e.target.value)}
+              error={formErrors.compareAtPrice}
             />
 
             <Input
@@ -322,6 +341,9 @@ export default function AdminEditBookPage({
               error={formErrors.pageCount}
             />
           </div>
+          <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>
+            Set an original price higher than the sale price to show a % OFF offer label on the storefront.
+          </p>
 
           <div style={{ display: 'flex', gap: '2rem', marginTop: '1.25rem', flexWrap: 'wrap' }}>
             <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
