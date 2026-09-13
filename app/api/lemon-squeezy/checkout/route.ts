@@ -7,24 +7,7 @@ import {
   isLemonSqueezyConfigured,
   type LineItemDetail,
 } from '@/lib/lemon-squeezy';
-import { buildCheckoutCoverUrl } from '@/lib/r2';
 import { getSessionUser } from '@/lib/auth';
-
-function getCheckoutAppOrigin(req: NextRequest): string {
-  const envUrl = (process.env.NEXT_PUBLIC_APP_URL || '').trim().replace(/\/$/, '');
-  if (envUrl.startsWith('http://') || envUrl.startsWith('https://')) {
-    return envUrl;
-  }
-
-  const origin = req.headers.get('origin');
-  if (origin) return origin.replace(/\/$/, '');
-
-  const proto = req.headers.get('x-forwarded-proto') || 'https';
-  const host = req.headers.get('x-forwarded-host') || req.headers.get('host');
-  if (host) return `${proto}://${host}`.replace(/\/$/, '');
-
-  return 'http://localhost:3000';
-}
 
 export async function POST(req: NextRequest) {
   try {
@@ -42,7 +25,7 @@ export async function POST(req: NextRequest) {
     const sessionUser = await getSessionUser();
     const userId = sessionUser?.id || `guest_${Date.now()}`;
     const name = customerName || sessionUser?.name || 'Gourmet Customer';
-    const origin = getCheckoutAppOrigin(req);
+    const origin = req.headers.get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
     const verifiedLineItems: LineItemDetail[] = [];
 
@@ -55,14 +38,14 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      const coverImageUrl = buildCheckoutCoverUrl(book.id, origin);
-
       verifiedLineItems.push({
         bookId: book.id,
         title: book.title,
         unitPrice: Number(book.price),
         quantity: Math.max(1, Math.floor(Number(item.quantity) || 1)),
-        coverImageUrl,
+        coverImageUrl: book.coverImageUrl.startsWith('/')
+          ? `${origin}${book.coverImageUrl}`
+          : book.coverImageUrl,
       });
     }
 

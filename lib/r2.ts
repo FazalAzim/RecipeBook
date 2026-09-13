@@ -213,58 +213,6 @@ export async function getR2PresignedDownloadUrl(
 }
 
 /**
- * Short cover URL for Lemon Squeezy (media URLs must be ≤ 255 chars).
- * Points at /api/cover/[bookId] which streams image bytes (no redirect).
- */
-export function buildCheckoutCoverUrl(bookId: string, appOrigin: string): string | undefined {
-  const base = (process.env.NEXT_PUBLIC_APP_URL || appOrigin || '')
-    .trim()
-    .replace(/\/$/, '');
-  if (!base || !bookId) return undefined;
-
-  // Prefer https for Lemon Squeezy servers to fetch the image
-  const secureBase = base.replace(/^http:\/\//i, 'https://');
-  const url = `${secureBase}/api/cover/${encodeURIComponent(bookId)}.jpg`;
-  if (url.length > 255) return undefined;
-  return url;
-}
-
-/**
- * Returns a durable, publicly fetchable HTTPS URL for Lemon Squeezy checkout media.
- * Prefer {@link buildCheckoutCoverUrl} — presigned R2 URLs often exceed LS's 255-char limit.
- */
-export async function resolveCheckoutCoverUrl(
-  coverImageUrl: string,
-  appOrigin: string
-): Promise<string | undefined> {
-  if (!coverImageUrl || coverImageUrl.startsWith('data:')) return undefined;
-
-  const base = (process.env.NEXT_PUBLIC_APP_URL || appOrigin || '')
-    .trim()
-    .replace(/\/$/, '');
-
-  const key = extractR2KeyFromStoredValue(coverImageUrl);
-  if (key?.startsWith('covers/')) {
-    if (hasR2PublicDomain()) {
-      const url = `${publicUrl.replace(/\/$/, '')}/${key}`;
-      return url.length <= 255 ? url : undefined;
-    }
-  }
-
-  if (coverImageUrl.startsWith('/')) {
-    if (!base) return undefined;
-    const url = `${base}${coverImageUrl}`;
-    return url.length <= 255 ? url : undefined;
-  }
-
-  if (coverImageUrl.startsWith('http://') || coverImageUrl.startsWith('https://')) {
-    return coverImageUrl.length <= 255 ? coverImageUrl : undefined;
-  }
-
-  return undefined;
-}
-
-/**
  * Retrieves a file object from R2 directly for server-side streaming
  */
 export async function getR2Object(key: string) {
