@@ -15,6 +15,20 @@ export function parseCompareAtPrice(raw: unknown): number | undefined {
 }
 
 /**
+ * Returns a valid compare-at only when it is strictly higher than sale price.
+ * Equal or lower values are treated as "no offer" (undefined), not an error.
+ */
+export function normalizeCompareAtPrice(
+  salePrice: number,
+  raw: unknown
+): number | undefined {
+  const compareAt = parseCompareAtPrice(raw);
+  if (compareAt == null) return undefined;
+  if (!Number.isFinite(salePrice) || compareAt <= salePrice) return undefined;
+  return compareAt;
+}
+
+/**
  * Returns offer details when compare-at is set and higher than the sale price.
  * Checkout always uses `price` — this is display-only.
  */

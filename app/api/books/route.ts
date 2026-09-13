@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDbBooks, createDbBook } from '@/lib/db/books';
 import { getSessionUser } from '@/lib/auth';
-import { parseCompareAtPrice } from '@/lib/pricing';
+import { normalizeCompareAtPrice } from '@/lib/pricing';
 import type { FilterState } from '@/lib/types';
 
 export async function GET(req: NextRequest) {
@@ -51,14 +51,7 @@ export async function POST(req: NextRequest) {
     }
 
     const price = Number(bookData.price);
-    const compareAtPrice = parseCompareAtPrice(bookData.compareAtPrice);
-
-    if (compareAtPrice != null && compareAtPrice <= price) {
-      return NextResponse.json(
-        { error: 'Original (compare-at) price must be higher than the sale price.' },
-        { status: 400 }
-      );
-    }
+    const compareAtPrice = normalizeCompareAtPrice(price, bookData.compareAtPrice);
 
     const requestedId =
       typeof bookData.id === 'string' && /^book-[a-zA-Z0-9_-]+$/.test(bookData.id.trim())

@@ -21,7 +21,9 @@ import { QuantitySelector } from '@/components/books/QuantitySelector';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { ErrorState } from '@/components/common/ErrorState';
 import { AdSenseDisplayAd } from '@/components/ads/AdSenseDisplayAd';
+import { BookPreviewGallery } from '@/components/books/BookPreviewGallery';
 import { getOffer } from '@/lib/pricing';
+import { getBookPreviewPages } from '@/lib/book-previews';
 import type { Book } from '@/lib/types';
 
 export default function BookDetailPage({
@@ -96,6 +98,10 @@ export default function BookDetailPage({
   }
 
   const offer = getOffer(book);
+  const previewPages = getBookPreviewPages(book.title);
+  const buyLabel = offer
+    ? `Buy Now — $${(book.price * quantity).toFixed(2)} (${offer.percentOff}% OFF)`
+    : `Buy Now — $${(book.price * quantity).toFixed(2)}`;
 
   return (
     <div style={{ padding: '1.5rem 0 3rem' }} className="book-detail-page">
@@ -367,6 +373,42 @@ export default function BookDetailPage({
               </div>
             )}
 
+            {/* What you get */}
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+                gap: '0.75rem',
+                marginBottom: '1.75rem',
+              }}
+              className="book-trust-row"
+            >
+              {[
+                { icon: <Download size={16} color="var(--primary)" />, text: 'Instant PDF' },
+                { icon: <Smartphone size={16} color="var(--accent-olive)" />, text: 'Phone & tablet ready' },
+                { icon: <Printer size={16} color="var(--secondary)" />, text: 'Print-friendly pages' },
+              ].map((item) => (
+                <div
+                  key={item.text}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    padding: '0.65rem 0.75rem',
+                    borderRadius: 'var(--radius-md)',
+                    background: 'var(--bg-subtle)',
+                    border: '1px solid #2E2825',
+                    fontSize: '0.8125rem',
+                    fontWeight: 600,
+                    color: 'var(--text-secondary)',
+                  }}
+                >
+                  {item.icon}
+                  {item.text}
+                </div>
+              ))}
+            </div>
+
             {/* Purchase Action Bar */}
             <div
               style={{
@@ -385,7 +427,7 @@ export default function BookDetailPage({
                 size="lg"
                 leftIcon={<ShoppingBag size={20} />}
                 onClick={handleAddToCart}
-                style={{ flex: '1 1 150px' }}
+                style={{ flex: '1 1 140px' }}
               >
                 Add to Cart
               </Button>
@@ -394,9 +436,9 @@ export default function BookDetailPage({
                 variant="primary"
                 size="lg"
                 onClick={handleBuyNow}
-                style={{ flex: '1.4 1 200px' }}
+                style={{ flex: '1.6 1 220px' }}
               >
-                Buy Now — ${(book.price * quantity).toFixed(2)}
+                {buyLabel}
               </Button>
             </div>
 
@@ -416,6 +458,14 @@ export default function BookDetailPage({
           </div>
         </div>
 
+        <BookPreviewGallery
+          pages={previewPages}
+          bookTitle={book.title}
+          onBuyClick={handleBuyNow}
+          buyLabel={buyLabel}
+          offerPercent={offer?.percentOff}
+        />
+
         <div style={{ marginTop: '2.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border-light)' }}>
           <AdSenseDisplayAd />
         </div>
@@ -425,6 +475,9 @@ export default function BookDetailPage({
             .book-detail-grid {
               grid-template-columns: 1fr !important;
               gap: 2rem !important;
+            }
+            .book-trust-row {
+              grid-template-columns: 1fr !important;
             }
           }
         `}</style>
