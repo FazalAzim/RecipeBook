@@ -10,14 +10,14 @@ const PREVIEW_BY_TITLE: Array<{ match: string; pages: BookPreviewPage[] }> = [
     match: 'dessert',
     pages: [
       {
-        src: '/books/previews/desserts-dreams-mousse-interior.png',
-        alt: 'Classic Chocolate Mousse Cake — recipe overview page',
-        caption: 'Chocolate Mousse Cake · overview',
+        src: '/books/previews/desserts-dreams-pudding-interior.jpg',
+        alt: 'Chocolate Pudding — recipe overview page from Desserts Dreams',
+        caption: 'Chocolate Pudding · overview',
       },
       {
-        src: '/books/previews/desserts-dreams-mousse-instructions.png',
-        alt: 'Classic Chocolate Mousse Cake — step-by-step instructions',
-        caption: 'Chocolate Mousse Cake · instructions',
+        src: '/books/previews/desserts-dreams-pudding-instructions.jpg',
+        alt: 'Chocolate Pudding — step-by-step instructions from Desserts Dreams',
+        caption: 'Chocolate Pudding · instructions',
       },
     ],
   },
