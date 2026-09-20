@@ -466,7 +466,14 @@ export default function BookDetailPage({
           offerPercent={offer?.percentOff}
         />
 
-        <div style={{ marginTop: '2.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border-light)' }}>
+        {/* AdSense: separated from Buy/Download CTAs; labeled "Advertisement" */}
+        <div
+          style={{
+            marginTop: '3.5rem',
+            paddingTop: '2rem',
+            borderTop: '1px solid var(--border-light)',
+          }}
+        >
           <AdSenseDisplayAd />
         </div>
 

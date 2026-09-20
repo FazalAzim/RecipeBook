@@ -495,8 +495,8 @@ export default function HomePage() {
 
       <section
         className="page-section"
-        style={{ padding: '0 0 3rem' }}
-        aria-label="Sponsored"
+        style={{ padding: '1.5rem 0 3rem' }}
+        aria-label="Advertisement"
       >
         <div className="container">
           <AdSenseDisplayAd />
