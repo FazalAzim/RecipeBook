@@ -21,9 +21,7 @@ import { QuantitySelector } from '@/components/books/QuantitySelector';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { ErrorState } from '@/components/common/ErrorState';
 import { AdSenseDisplayAd } from '@/components/ads/AdSenseDisplayAd';
-import { BookPreviewGallery } from '@/components/books/BookPreviewGallery';
 import { getOffer } from '@/lib/pricing';
-import { getBookPreviewPages } from '@/lib/book-previews';
 import type { Book } from '@/lib/types';
 
 export default function BookDetailPage({
@@ -98,7 +96,6 @@ export default function BookDetailPage({
   }
 
   const offer = getOffer(book);
-  const previewPages = getBookPreviewPages(book.title);
   const buyLabel = offer
     ? `Buy Now — $${(book.price * quantity).toFixed(2)} (${offer.percentOff}% OFF)`
     : `Buy Now — $${(book.price * quantity).toFixed(2)}`;
@@ -457,14 +454,6 @@ export default function BookDetailPage({
             </p>
           </div>
         </div>
-
-        <BookPreviewGallery
-          pages={previewPages}
-          bookTitle={book.title}
-          onBuyClick={handleBuyNow}
-          buyLabel={buyLabel}
-          offerPercent={offer?.percentOff}
-        />
 
         {/* AdSense: separated from Buy/Download CTAs; labeled "Advertisement" */}
         <div

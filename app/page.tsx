@@ -43,8 +43,9 @@ export default function HomePage() {
         const data = await res.json();
         const list = (data.books || []) as Book[];
         const preferred =
+          list.find((b) => /homemade\s*goodness/i.test(b.title)) ||
+          list.find((b) => /homemade/i.test(b.title)) ||
           list.find((b) => b.featured) ||
-          list.find((b) => /dessert/i.test(b.title)) ||
           list[0] ||
           null;
         setFeaturedBook(preferred);
@@ -88,9 +89,9 @@ export default function HomePage() {
     setFilters(INITIAL_FILTERS);
   };
 
-  // Marketing hero always uses the curated Dessert Dreams cover asset
-  const heroCover = '/books/dessert-dreams-cover.jpg?v=2';
-  const heroTitle = featuredBook?.title || 'Desserts Dreams';
+  // Marketing hero features Homemade Goodness
+  const heroCover = '/books/homemade-goodness-cover.jpg?v=2';
+  const heroTitle = featuredBook?.title || 'Homemade Goodness';
   const heroAuthor = featuredBook?.author || 'Wellness Jar';
   const heroPrice = featuredBook?.price ?? 19.99;
   const heroOffer = featuredBook ? getOffer(featuredBook) : null;
@@ -144,7 +145,7 @@ export default function HomePage() {
             </div>
 
             <h1 style={{ marginBottom: '1rem', color: 'var(--text-primary)', lineHeight: 1.12 }}>
-              Cook beautiful desserts at home with{' '}
+              Bake from scratch at home with{' '}
               <span style={{ color: 'var(--primary)' }}>ready-to-follow</span> recipe books.
             </h1>
 
@@ -157,7 +158,8 @@ export default function HomePage() {
                 maxWidth: '540px',
               }}
             >
-              Chef-crafted digital cookbooks you can open on your phone, tablet, or print for the kitchen.
+              Start with <strong style={{ color: 'var(--text-primary)' }}>Homemade Goodness</strong> —
+              breads, sauces, and kitchen staples you can open on your phone, tablet, or print for the counter.
               Buy once, download instantly, keep forever.
             </p>
 
