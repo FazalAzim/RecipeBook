@@ -32,6 +32,7 @@ export default function AdminNewBookPage() {
   const [pageCount, setPageCount] = useState('120');
   const [isPublished, setIsPublished] = useState(true);
   const [isFeatured, setIsFeatured] = useState(false);
+  const [comingSoon, setComingSoon] = useState(false);
 
   // Cover image upload state
   const [coverFile, setCoverFile] = useState<File | null>(null);
@@ -116,7 +117,7 @@ export default function AdminNewBookPage() {
       errors.compareAtPrice = 'Original price must be higher than the sale price (e.g. sale 9.99, original 19.99).';
     }
     if (!pageCount || isNaN(Number(pageCount)) || Number(pageCount) < 1) errors.pageCount = 'Page count must be >= 1.';
-    if (!pdfFile) errors.pdf = 'A cookbook PDF is required before publishing.';
+    if (!comingSoon && !pdfFile) errors.pdf = 'A cookbook PDF is required before publishing (or mark as Coming Soon).';
 
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
@@ -130,8 +131,8 @@ export default function AdminNewBookPage() {
     try {
       let coverImageUrl = coverPreview || 'https://images.unsplash.com/photo-1495521821757-a1efb6729352?auto=format&fit=crop&w=800&q=80';
       let pdfFileUrl = '';
-      let pdfFileName = pdfFile!.name;
-      let fileSize = `${(pdfFile!.size / (1024 * 1024)).toFixed(1)} MB`;
+      let pdfFileName = pdfFile?.name || `${title.replace(/\s+/g, '_')}.pdf`;
+      let fileSize = pdfFile ? `${(pdfFile.size / (1024 * 1024)).toFixed(1)} MB` : 'TBA';
 
       // 1. Upload cover image if provided
       if (coverFile) {
@@ -140,12 +141,16 @@ export default function AdminNewBookPage() {
         coverImageUrl = uploadData.url;
       }
 
-      // 2. Upload PDF document (required) — direct to R2, bypasses Vercel 4.5 MB limit
-      setUploadProgress(60);
-      const uploadData = await uploadBookAsset(pdfFile!, 'pdf', draftBookId);
-      pdfFileUrl = uploadData.url;
-      pdfFileName = uploadData.fileName;
-      fileSize = uploadData.fileSize;
+      // 2. Upload PDF when provided (optional for Coming Soon)
+      if (pdfFile) {
+        setUploadProgress(60);
+        const uploadData = await uploadBookAsset(pdfFile, 'pdf', draftBookId);
+        pdfFileUrl = uploadData.url;
+        pdfFileName = uploadData.fileName;
+        fileSize = uploadData.fileSize;
+      } else {
+        setUploadProgress(60);
+      }
 
       setUploadProgress(85);
 
@@ -178,6 +183,7 @@ export default function AdminNewBookPage() {
           fileSize,
           isPublished,
           featured: isFeatured,
+          comingSoon,
         }),
       });
 
@@ -379,7 +385,22 @@ export default function AdminNewBookPage() {
               />
               <span style={{ fontSize: '0.875rem', fontWeight: 600 }}>Feature as Chef&apos;s Pick on Home Page</span>
             </label>
+
+            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                checked={comingSoon}
+                onChange={(e) => setComingSoon(e.target.checked)}
+                style={{ width: '18px', height: '18px', accentColor: 'var(--primary)' }}
+              />
+              <span style={{ fontSize: '0.875rem', fontWeight: 600 }}>Coming Soon (customers see it, cannot buy yet)</span>
+            </label>
           </div>
+          {comingSoon && (
+            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.75rem' }}>
+              Shown on the storefront with a Coming Soon badge. PDF is optional until you release the book.
+            </p>
+          )}
         </div>
 
         {/* Section 3: File Uploads (Cover Image & PDF Document) */}
@@ -446,7 +467,7 @@ export default function AdminNewBookPage() {
             {/* Recipe PDF Document */}
             <div>
               <label className="form-label" style={{ marginBottom: '0.5rem', display: 'block' }}>
-                Recipe Book PDF Document
+                Recipe Book PDF Document{comingSoon ? ' (optional while Coming Soon)' : ''}
               </label>
 
               <input

@@ -79,6 +79,11 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const addItem = useCallback(
     (book: Book, quantityToAdd = 1) => {
+      if (book.comingSoon) {
+        showToast(`"${book.title}" is coming soon and cannot be purchased yet.`, 'info');
+        return;
+      }
+
       const qty = Math.max(1, quantityToAdd);
       setItems((prevItems) => {
         const existingIndex = prevItems.findIndex((item) => item.bookId === book.id);

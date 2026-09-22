@@ -102,6 +102,9 @@ export default function HomePage() {
       document.getElementById('cookbook-catalog')?.scrollIntoView({ behavior: 'smooth' });
       return;
     }
+    if (featuredBook.comingSoon) {
+      return;
+    }
     addItem(featuredBook, 1);
   };
 
@@ -328,7 +331,11 @@ export default function HomePage() {
                       )}
                     </div>
                     <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-                      {heroOffer ? 'Limited offer · Instant PDF' : 'Instant PDF'}
+                      {featuredBook?.comingSoon
+                        ? 'Coming soon · Preview only'
+                        : heroOffer
+                          ? 'Limited offer · Instant PDF'
+                          : 'Instant PDF'}
                     </div>
                   </div>
                 </div>
@@ -341,18 +348,24 @@ export default function HomePage() {
                       </Button>
                     </Link>
                   )}
-                  <Button
-                    variant="primary"
-                    fullWidth
-                    leftIcon={<ShoppingBag size={16} />}
-                    onClick={handleHeroBuy}
-                  >
-                    {featuredBook
-                      ? heroInCart
-                        ? 'Add Another'
-                        : 'Add to Cart'
-                      : 'Browse Books'}
-                  </Button>
+                  {featuredBook?.comingSoon ? (
+                    <Button variant="secondary" fullWidth disabled>
+                      Coming Soon
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="primary"
+                      fullWidth
+                      leftIcon={<ShoppingBag size={16} />}
+                      onClick={handleHeroBuy}
+                    >
+                      {featuredBook
+                        ? heroInCart
+                          ? 'Add Another'
+                          : 'Add to Cart'
+                        : 'Browse Books'}
+                    </Button>
+                  )}
                 </div>
               </div>
             </div>

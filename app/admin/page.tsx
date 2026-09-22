@@ -367,9 +367,12 @@ export default function AdminDashboardPage() {
                   </td>
                   <td style={{ padding: '0.75rem', fontWeight: 600 }}>{book.salesCount}</td>
                   <td style={{ padding: '0.75rem' }}>
-                    <Badge variant={book.isPublished ? 'success' : 'neutral'}>
-                      {book.isPublished ? 'Published' : 'Draft / Hidden'}
-                    </Badge>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', alignItems: 'flex-start' }}>
+                      <Badge variant={book.isPublished ? 'success' : 'neutral'}>
+                        {book.isPublished ? 'Published' : 'Draft / Hidden'}
+                      </Badge>
+                      {book.comingSoon && <Badge variant="amber">Coming Soon</Badge>}
+                    </div>
                   </td>
                   <td style={{ padding: '0.75rem', textAlign: 'right' }}>
                     <div style={{ display: 'inline-flex', gap: '0.375rem' }}>

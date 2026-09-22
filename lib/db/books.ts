@@ -64,6 +64,7 @@ function mapDocToBook(d: Record<string, unknown>): Book {
     salesCount: Number(d.salesCount || 0),
     isPublished: Boolean(d.isPublished),
     featured: Boolean(d.featured),
+    comingSoon: Boolean(d.comingSoon),
     rating: Number(d.rating || 5.0),
     reviewCount: Number(d.reviewCount || 1),
     createdAt: d.createdAt ? new Date(d.createdAt as string).toISOString() : new Date().toISOString(),

@@ -17,11 +17,15 @@ export const BookCard: React.FC<BookCardProps> = ({ book }) => {
   const inCart = isInCart(book.id);
   const offer = getOffer(book);
 
-  const benefitLine =
-    book.description?.trim().split(/[.!?\n]/).filter(Boolean)[0]?.trim() ||
-    `${book.pageCount} pages · Instant PDF download`;
+  const isComingSoon = Boolean(book.comingSoon);
+
+  const benefitLine = isComingSoon
+    ? 'Coming soon — preview this cookbook before it launches'
+    : book.description?.trim().split(/[.!?\n]/).filter(Boolean)[0]?.trim() ||
+      `${book.pageCount} pages · Instant PDF download`;
 
   const handleAdd = () => {
+    if (isComingSoon) return;
     addItem(book, 1);
   };
 
@@ -82,7 +86,25 @@ export const BookCard: React.FC<BookCardProps> = ({ book }) => {
             {offer.percentOff}% OFF
           </span>
         )}
-        {book.featured && (
+        {isComingSoon ? (
+          <span
+            style={{
+              position: 'absolute',
+              bottom: '0.625rem',
+              left: '0.625rem',
+              backgroundColor: 'rgba(26, 22, 19, 0.95)',
+              color: '#93C5FD',
+              fontSize: '0.6875rem',
+              fontWeight: 700,
+              padding: '0.25rem 0.5rem',
+              borderRadius: 'var(--radius-pill)',
+              boxShadow: 'var(--shadow-sm)',
+              border: '1px solid rgba(147, 197, 253, 0.4)',
+            }}
+          >
+            Coming Soon
+          </span>
+        ) : book.featured ? (
           <span
             style={{
               position: 'absolute',
@@ -100,7 +122,7 @@ export const BookCard: React.FC<BookCardProps> = ({ book }) => {
           >
             Featured
           </span>
-        )}
+        ) : null}
       </Link>
 
       <div className="book-card-body" style={{ padding: '1rem', display: 'flex', flexDirection: 'column', flex: 1 }}>
@@ -208,31 +230,39 @@ export const BookCard: React.FC<BookCardProps> = ({ book }) => {
                 )}
               </div>
               <span style={{ display: 'block', fontSize: '0.6875rem', color: 'var(--text-muted)' }}>
-                {offer
-                  ? `Offer · Save $${(offer.compareAtPrice - offer.price).toFixed(2)}`
-                  : `Instant download · ${book.pageCount} pages`}
+                {isComingSoon
+                  ? 'Preview only · Not for sale yet'
+                  : offer
+                    ? `Offer · Save $${(offer.compareAtPrice - offer.price).toFixed(2)}`
+                    : `Instant download · ${book.pageCount} pages`}
               </span>
             </div>
           </div>
 
           <div
             className="book-card-actions"
-            style={{ display: 'grid', gridTemplateColumns: '0.85fr 1.25fr', gap: '0.5rem' }}
+            style={{
+              display: 'grid',
+              gridTemplateColumns: isComingSoon ? '1fr' : '0.85fr 1.25fr',
+              gap: '0.5rem',
+            }}
           >
             <Link href={`/books/${book.id}`} style={{ width: '100%' }}>
               <Button variant="secondary" size="sm" fullWidth>
                 Details
               </Button>
             </Link>
-            <Button
-              variant={inCart ? 'secondary' : 'primary'}
-              size="sm"
-              fullWidth
-              leftIcon={<ShoppingBag size={14} />}
-              onClick={handleAdd}
-            >
-              {inCart ? 'Add More' : 'Add to Cart'}
-            </Button>
+            {!isComingSoon && (
+              <Button
+                variant={inCart ? 'secondary' : 'primary'}
+                size="sm"
+                fullWidth
+                leftIcon={<ShoppingBag size={14} />}
+                onClick={handleAdd}
+              >
+                {inCart ? 'Add More' : 'Add to Cart'}
+              </Button>
+            )}
           </div>
         </div>
       </div>

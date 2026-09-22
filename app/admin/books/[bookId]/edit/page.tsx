@@ -40,6 +40,7 @@ export default function AdminEditBookPage({
   const [pageCount, setPageCount] = useState('');
   const [isPublished, setIsPublished] = useState(true);
   const [isFeatured, setIsFeatured] = useState(false);
+  const [comingSoon, setComingSoon] = useState(false);
 
   // New file replacement states
   const [newCoverFile, setNewCoverFile] = useState<File | null>(null);
@@ -77,6 +78,7 @@ export default function AdminEditBookPage({
         setPageCount(book.pageCount.toString());
         setIsPublished(book.isPublished);
         setIsFeatured(Boolean(book.featured));
+        setComingSoon(Boolean(book.comingSoon));
         setCoverPreview(book.coverImageUrl);
       } catch (err: any) {
         showToast(err.message || 'Error loading book', 'error');
@@ -158,6 +160,7 @@ export default function AdminEditBookPage({
         pageCount: Number(pageCount),
         isPublished,
         featured: isFeatured,
+        comingSoon,
       };
 
       // 1. Upload replacement cover if chosen
@@ -367,7 +370,22 @@ export default function AdminEditBookPage({
               />
               <span style={{ fontSize: '0.875rem', fontWeight: 600 }}>Featured as Chef Pick</span>
             </label>
+
+            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                checked={comingSoon}
+                onChange={(e) => setComingSoon(e.target.checked)}
+                style={{ width: '18px', height: '18px', accentColor: 'var(--primary)' }}
+              />
+              <span style={{ fontSize: '0.875rem', fontWeight: 600 }}>Coming Soon (customers see it, cannot buy yet)</span>
+            </label>
           </div>
+          {comingSoon && (
+            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.75rem' }}>
+              Shown on the storefront with a Coming Soon badge. Uncheck when the PDF is ready to sell.
+            </p>
+          )}
         </div>
 
         {/* File Replacements */}

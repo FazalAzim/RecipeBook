@@ -77,6 +77,7 @@ export async function POST(req: NextRequest) {
         pageCount: Number(bookData.pageCount || 100),
         isPublished: Boolean(bookData.isPublished ?? true),
         featured: Boolean(bookData.featured ?? false),
+        comingSoon: Boolean(bookData.comingSoon ?? false),
       },
       requestedId ? { bookId: requestedId } : undefined
     );

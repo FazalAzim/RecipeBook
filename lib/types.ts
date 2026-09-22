@@ -29,6 +29,8 @@ export interface Book {
   salesCount: number;
   isPublished: boolean;
   featured?: boolean;
+  /** Visible on storefront but not purchasable yet. */
+  comingSoon?: boolean;
   rating?: number;
   reviewCount?: number;
 }

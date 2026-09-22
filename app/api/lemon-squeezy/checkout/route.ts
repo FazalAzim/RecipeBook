@@ -31,10 +31,16 @@ export async function POST(req: NextRequest) {
 
     for (const item of items) {
       const book = await getDbBookById(item.bookId);
-      if (!book) {
+      if (!book || !book.isPublished) {
         return NextResponse.json(
           { error: `Recipe book "${item.bookId}" is no longer available.` },
           { status: 404 }
+        );
+      }
+      if (book.comingSoon) {
+        return NextResponse.json(
+          { error: `"${book.title}" is coming soon and cannot be purchased yet.` },
+          { status: 400 }
         );
       }
 

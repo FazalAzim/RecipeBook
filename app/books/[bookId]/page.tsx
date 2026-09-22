@@ -61,12 +61,12 @@ export default function BookDetailPage({
   }, [bookId]);
 
   const handleAddToCart = () => {
-    if (!book) return;
+    if (!book || book.comingSoon) return;
     addItem(book, quantity);
   };
 
   const handleBuyNow = () => {
-    if (!book) return;
+    if (!book || book.comingSoon) return;
     addItem(book, quantity);
     router.push('/checkout');
   };
@@ -207,6 +207,7 @@ export default function BookDetailPage({
               <Badge variant="neutral">{book.category}</Badge>
               <Badge variant="primary">{book.cuisine}</Badge>
               {book.featured && <Badge variant="amber">Featured</Badge>}
+              {book.comingSoon && <Badge variant="neutral">Coming Soon</Badge>}
             </div>
 
             <h1 style={{ fontSize: 'clamp(1.75rem, 3.5vw, 2.375rem)', marginBottom: '0.5rem', lineHeight: 1.2 }}>
@@ -307,11 +308,13 @@ export default function BookDetailPage({
                   >
                     {offer.percentOff}% OFF
                   </span>
+                ) : book.comingSoon ? (
+                  <span className="badge badge-neutral">Coming Soon</span>
                 ) : (
                   <span className="badge badge-success">Instant Delivery</span>
                 )}
                 <div style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
-                  PDF • {book.fileSize}
+                  {book.comingSoon ? 'Not available for purchase yet' : `PDF • ${book.fileSize}`}
                 </div>
               </div>
             </div>
@@ -407,51 +410,86 @@ export default function BookDetailPage({
             </div>
 
             {/* Purchase Action Bar */}
-            <div
-              style={{
-                display: 'flex',
-                gap: '0.75rem',
-                alignItems: 'center',
-                paddingTop: '1.5rem',
-                borderTop: '1px solid var(--border-light)',
-                flexWrap: 'wrap',
-              }}
-            >
-              <QuantitySelector quantity={quantity} onChange={setQuantity} />
-
-              <Button
-                variant="secondary"
-                size="lg"
-                leftIcon={<ShoppingBag size={20} />}
-                onClick={handleAddToCart}
-                style={{ flex: '1 1 140px' }}
+            {book.comingSoon ? (
+              <div
+                style={{
+                  paddingTop: '1.5rem',
+                  borderTop: '1px solid var(--border-light)',
+                }}
               >
-                Add to Cart
-              </Button>
+                <div
+                  style={{
+                    backgroundColor: 'var(--bg-subtle)',
+                    border: '1px solid var(--border-light)',
+                    borderRadius: 'var(--radius-md)',
+                    padding: '1.25rem 1.5rem',
+                    textAlign: 'center',
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: '1.125rem',
+                      fontWeight: 700,
+                      color: 'var(--text-primary)',
+                      marginBottom: '0.35rem',
+                    }}
+                  >
+                    Coming Soon
+                  </div>
+                  <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', margin: 0 }}>
+                    This cookbook isn&apos;t available for purchase yet. Check back soon.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div
+                  style={{
+                    display: 'flex',
+                    gap: '0.75rem',
+                    alignItems: 'center',
+                    paddingTop: '1.5rem',
+                    borderTop: '1px solid var(--border-light)',
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  <QuantitySelector quantity={quantity} onChange={setQuantity} />
 
-              <Button
-                variant="primary"
-                size="lg"
-                onClick={handleBuyNow}
-                style={{ flex: '1.6 1 220px' }}
-              >
-                {buyLabel}
-              </Button>
-            </div>
+                  <Button
+                    variant="secondary"
+                    size="lg"
+                    leftIcon={<ShoppingBag size={20} />}
+                    onClick={handleAddToCart}
+                    style={{ flex: '1 1 140px' }}
+                  >
+                    Add to Cart
+                  </Button>
 
-            <p
-              style={{
-                marginTop: '0.875rem',
-                fontSize: '0.8125rem',
-                color: 'var(--text-muted)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.375rem',
-              }}
-            >
-              <CheckCircle2 size={14} color="var(--accent-olive)" />
-              Secure checkout · Instant download · Lifetime access
-            </p>
+                  <Button
+                    variant="primary"
+                    size="lg"
+                    onClick={handleBuyNow}
+                    style={{ flex: '1.6 1 220px' }}
+                  >
+                    {buyLabel}
+                  </Button>
+                </div>
+
+                <p
+                  style={{
+                    marginTop: '0.875rem',
+                    fontSize: '0.8125rem',
+                    color: 'var(--text-muted)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.375rem',
+                  }}
+                >
+                  <CheckCircle2 size={14} color="var(--accent-olive)" />
+                  Secure checkout · Instant download · Lifetime access
+                </p>
+              </>
+            )}
           </div>
         </div>
 
