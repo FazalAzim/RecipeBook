@@ -88,8 +88,10 @@ export const Header: React.FC = () => {
         position: 'sticky',
         top: 0,
         zIndex: mobileMenuOpen ? 10002 : 100,
-        backgroundColor: 'rgba(16, 14, 12, 0.92)',
-        borderBottom: '1px solid var(--border-base)',
+        backgroundColor: 'rgba(16, 14, 12, 0.55)',
+        backdropFilter: 'blur(16px) saturate(1.1)',
+        WebkitBackdropFilter: 'blur(16px) saturate(1.1)',
+        borderBottom: '1px solid rgba(243, 237, 228, 0.1)',
       }}
     >
       <div

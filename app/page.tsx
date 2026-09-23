@@ -110,14 +110,13 @@ export default function HomePage() {
 
   return (
     <div>
-      {/* Hero Section */}
+      {/* Hero Section — transparent over page atmosphere */}
       <section
         className="hero-section"
         style={{
-          background:
-            'radial-gradient(ellipse at top right, rgba(240, 106, 34, 0.18) 0%, transparent 48%), linear-gradient(180deg, #161210 0%, var(--bg-app) 100%)',
+          background: 'transparent',
           padding: '2.5rem 0 2.75rem',
-          borderBottom: '1px solid var(--border-light)',
+          borderBottom: '1px solid rgba(243, 237, 228, 0.08)',
           position: 'relative',
           overflow: 'hidden',
         }}
@@ -126,20 +125,20 @@ export default function HomePage() {
           className="container hero-grid"
           style={{ display: 'grid', gridTemplateColumns: '1.15fr 0.95fr', gap: '2.75rem', alignItems: 'center' }}
         >
-          <div>
+          <div className="glass-panel" style={{ padding: 'clamp(1.35rem, 2.8vw, 2rem)' }}>
             <div
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '0.5rem',
-                backgroundColor: 'var(--primary-light)',
+                backgroundColor: 'rgba(240, 106, 34, 0.16)',
                 color: 'var(--primary-dark)',
                 padding: '0.375rem 0.875rem',
                 borderRadius: 'var(--radius-pill)',
                 fontSize: '0.75rem',
                 fontWeight: 700,
                 marginBottom: '1rem',
-                border: '1px solid var(--primary-border)',
+                border: '1px solid rgba(240, 106, 34, 0.35)',
                 maxWidth: '100%',
               }}
             >
@@ -147,7 +146,7 @@ export default function HomePage() {
               <span>Instant download · Lifetime access</span>
             </div>
 
-            <h1 style={{ marginBottom: '1rem', color: 'var(--text-primary)', lineHeight: 1.12 }}>
+            <h1 style={{ marginBottom: '1rem', color: '#F3EDE4', lineHeight: 1.12 }}>
               Bake from scratch at home with{' '}
               <span style={{ color: 'var(--primary)' }}>ready-to-follow</span> recipe books.
             </h1>
@@ -155,13 +154,13 @@ export default function HomePage() {
             <p
               style={{
                 fontSize: '1.0625rem',
-                color: 'var(--text-secondary)',
+                color: 'rgba(243, 237, 228, 0.78)',
                 marginBottom: '1.5rem',
                 lineHeight: 1.65,
                 maxWidth: '540px',
               }}
             >
-              Start with <strong style={{ color: 'var(--text-primary)' }}>Homemade Goodness</strong> —
+              Start with <strong style={{ color: '#F3EDE4' }}>Homemade Goodness</strong> —
               breads, sauces, and kitchen staples you can open on your phone, tablet, or print for the counter.
               Buy once, download instantly, keep forever.
             </p>
@@ -200,21 +199,21 @@ export default function HomePage() {
                 gap: '1.5rem',
                 marginTop: '2rem',
                 paddingTop: '1.5rem',
-                borderTop: '1px solid var(--border-light)',
+                borderTop: '1px solid rgba(243, 237, 228, 0.12)',
                 flexWrap: 'wrap',
               }}
             >
               <div>
-                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-primary)' }}>Buy once</div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>No subscriptions</div>
+                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#F3EDE4' }}>Buy once</div>
+                <div style={{ fontSize: '0.75rem', color: 'rgba(243, 237, 228, 0.55)' }}>No subscriptions</div>
               </div>
               <div>
-                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-primary)' }}>Instant</div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>PDF after payment</div>
+                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#F3EDE4' }}>Instant</div>
+                <div style={{ fontSize: '0.75rem', color: 'rgba(243, 237, 228, 0.55)' }}>PDF after payment</div>
               </div>
               <div>
-                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-primary)' }}>Lifetime</div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Library access</div>
+                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#F3EDE4' }}>Lifetime</div>
+                <div style={{ fontSize: '0.75rem', color: 'rgba(243, 237, 228, 0.55)' }}>Library access</div>
               </div>
             </div>
           </div>
@@ -222,14 +221,11 @@ export default function HomePage() {
           {/* Featured book sales card */}
           <div style={{ position: 'relative' }} className="hero-image-wrap">
             <div
-              className="surface-card hero-feature-card"
+              className="hero-feature-card glass-panel"
               style={{
                 padding: '1rem',
-                backgroundColor: 'var(--bg-surface)',
-                boxShadow: 'var(--shadow-xl)',
                 position: 'relative',
                 zIndex: 2,
-                border: '1px solid var(--border-light)',
               }}
             >
               <div
@@ -388,22 +384,6 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
-
-            <div
-              style={{
-                position: 'absolute',
-                top: '18px',
-                right: '-12px',
-                width: '100%',
-                height: '100%',
-                backgroundColor: 'var(--secondary-light)',
-                borderRadius: 'var(--radius-lg)',
-                border: '1px solid var(--primary-border)',
-                transform: 'rotate(3deg)',
-                zIndex: 1,
-              }}
-              className="hero-decorative-card"
-            />
           </div>
         </div>
 
@@ -418,9 +398,6 @@ export default function HomePage() {
               margin: 0 auto;
               width: 100%;
             }
-            .hero-feature-card {
-              transform: none !important;
-            }
           }
           @media (max-width: 767px) {
             .hero-cover-img {
@@ -432,10 +409,12 @@ export default function HomePage() {
 
       {/* Trust strip */}
       <section
-        className="trust-strip"
+        className="trust-strip glass-panel"
         style={{
-          backgroundColor: 'var(--bg-surface)',
-          borderBottom: '1px solid var(--border-light)',
+          borderRadius: 0,
+          borderLeft: 'none',
+          borderRight: 'none',
+          borderBottom: '1px solid rgba(243, 237, 228, 0.08)',
           padding: '1.25rem 0',
         }}
       >
@@ -478,7 +457,7 @@ export default function HomePage() {
                   width: 40,
                   height: 40,
                   borderRadius: 'var(--radius-md)',
-                  backgroundColor: 'var(--bg-subtle)',
+                  backgroundColor: 'rgba(243, 237, 228, 0.08)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -505,9 +484,14 @@ export default function HomePage() {
         id="cookbook-catalog-section"
       >
         <div className="container">
-          <div className="catalog-heading" style={{ marginBottom: '1.25rem' }}>
-            <h2 style={{ fontSize: '1.75rem', marginBottom: '0.25rem' }}>Start with these cookbooks</h2>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9375rem' }}>
+          <div
+            className="glass-panel catalog-heading"
+            style={{ marginBottom: '1.25rem', padding: '1.25rem 1.5rem' }}
+          >
+            <h2 style={{ fontSize: '1.75rem', marginBottom: '0.25rem', color: '#F3EDE4' }}>
+              Start with these cookbooks
+            </h2>
+            <p style={{ color: 'rgba(243, 237, 228, 0.72)', fontSize: '0.9375rem', margin: 0 }}>
               Beautiful, step-by-step recipe books formatted for phones, tablets, and printing.
             </p>
           </div>

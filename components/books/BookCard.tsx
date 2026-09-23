@@ -37,7 +37,7 @@ export const BookCard: React.FC<BookCardProps> = ({ book }) => {
         flexDirection: 'column',
         overflow: 'hidden',
         height: '100%',
-        backgroundColor: 'var(--bg-surface)',
+        backgroundColor: 'transparent',
       }}
     >
       <Link

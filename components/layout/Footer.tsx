@@ -7,12 +7,14 @@ export const Footer: React.FC = () => {
     <footer
       className="site-footer"
       style={{
-        backgroundColor: '#1C1917',
+        backgroundColor: 'rgba(16, 12, 10, 0.55)',
+        backdropFilter: 'blur(18px) saturate(1.1)',
+        WebkitBackdropFilter: 'blur(18px) saturate(1.1)',
         color: '#FAF7F2',
         paddingTop: '2.5rem',
         paddingBottom: '2rem',
         marginTop: '3rem',
-        borderTop: '1px solid #292524',
+        borderTop: '1px solid rgba(243, 237, 228, 0.1)',
       }}
     >
       <div className="container">

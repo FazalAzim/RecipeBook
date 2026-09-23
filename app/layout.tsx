@@ -5,6 +5,7 @@ import { CartProvider } from '@/contexts/CartContext';
 import { ToastProvider } from '@/contexts/ToastContext';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
+import { PageAtmosphere } from '@/components/layout/PageAtmosphere';
 import { StickyMobileCart } from '@/components/cart/StickyMobileCart';
 import { ToastContainer } from '@/components/common/ToastContainer';
 import { VisitTracker } from '@/components/analytics/VisitTracker';
@@ -47,6 +48,7 @@ export default function RootLayout({
         <ToastProvider>
           <AuthProvider>
             <CartProvider>
+              <PageAtmosphere />
               <div className="app-container has-sticky-cart">
                 <VisitTracker />
                 <Header />
