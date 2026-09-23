@@ -157,53 +157,57 @@ export default function BookDetailPage({
             </div>
 
             {/* Guaranteed digital highlights */}
-            <div
-              className="surface-card"
-              style={{
-                marginTop: '1.5rem',
-                padding: '1.25rem',
-                backgroundColor: 'var(--bg-surface)',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '0.875rem',
-              }}
-            >
-              <div style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.125rem' }}>
-                What you get
+            {!book.comingSoon && (
+              <div
+                className="surface-card"
+                style={{
+                  marginTop: '1.5rem',
+                  padding: '1.25rem',
+                  backgroundColor: 'var(--bg-surface)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.875rem',
+                }}
+              >
+                <div style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.125rem' }}>
+                  What you get
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <Download size={18} color="var(--primary)" />
+                  <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                    Instant digital download after payment
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <Smartphone size={18} color="var(--accent-olive)" />
+                  <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                    Works on phone, tablet, iPad & desktop
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <Printer size={18} color="var(--secondary)" />
+                  <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                    Print-friendly high-resolution PDF
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <ShieldCheck size={18} color="var(--primary-dark)" />
+                  <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                    Lifetime library access — re-download anytime
+                  </span>
+                </div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <Download size={18} color="var(--primary)" />
-                <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-                  Instant digital download after payment
-                </span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <Smartphone size={18} color="var(--accent-olive)" />
-                <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-                  Works on phone, tablet, iPad & desktop
-                </span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <Printer size={18} color="var(--secondary)" />
-                <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-                  Print-friendly high-resolution PDF
-                </span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <ShieldCheck size={18} color="var(--primary-dark)" />
-                <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-                  Lifetime library access — re-download anytime
-                </span>
-              </div>
-            </div>
+            )}
           </div>
 
           {/* Right Column: Book Specifications & Purchasing */}
           <div>
             <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem', flexWrap: 'wrap' }}>
-              <Badge variant="pdf" icon={<FileText size={12} />}>
-                Digital PDF
-              </Badge>
+              {!book.comingSoon && (
+                <Badge variant="pdf" icon={<FileText size={12} />}>
+                  Digital PDF
+                </Badge>
+              )}
               <Badge variant="neutral">{book.category}</Badge>
               <Badge variant="primary">{book.cuisine}</Badge>
               {book.featured && <Badge variant="amber">Featured</Badge>}
@@ -249,75 +253,94 @@ export default function BookDetailPage({
               </div>
             </div>
 
-            {/* Price Box */}
-            <div
-              style={{
-                backgroundColor: 'var(--primary-light)',
-                border: '1.5px solid var(--primary-border)',
-                borderRadius: 'var(--radius-lg)',
-                padding: '1.25rem 1.5rem',
-                marginBottom: '2rem',
-                display: 'flex',
-                alignItems: 'baseline',
-                justifyContent: 'space-between',
-                gap: '1rem',
-                flexWrap: 'wrap',
-              }}
-            >
-              <div>
-                <span style={{ fontSize: '0.8125rem', color: 'var(--primary-dark)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                  {offer ? `${offer.percentOff}% Off — Limited Offer` : 'Single Complete Edition'}
-                </span>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.65rem', flexWrap: 'wrap' }}>
-                  <div style={{ fontSize: '2.25rem', fontWeight: 800, color: 'var(--primary-dark)', fontFamily: 'var(--font-heading)' }}>
-                    ${book.price.toFixed(2)}
+            {/* Price Box — hidden for Coming Soon */}
+            {!book.comingSoon && (
+              <div
+                style={{
+                  backgroundColor: 'var(--primary-light)',
+                  border: '1.5px solid var(--primary-border)',
+                  borderRadius: 'var(--radius-lg)',
+                  padding: '1.25rem 1.5rem',
+                  marginBottom: '2rem',
+                  display: 'flex',
+                  alignItems: 'baseline',
+                  justifyContent: 'space-between',
+                  gap: '1rem',
+                  flexWrap: 'wrap',
+                }}
+              >
+                <div>
+                  <span style={{ fontSize: '0.8125rem', color: 'var(--primary-dark)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    {offer ? `${offer.percentOff}% Off — Limited Offer` : 'Single Complete Edition'}
+                  </span>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.65rem', flexWrap: 'wrap' }}>
+                    <div style={{ fontSize: '2.25rem', fontWeight: 800, color: 'var(--primary-dark)', fontFamily: 'var(--font-heading)' }}>
+                      ${book.price.toFixed(2)}
+                    </div>
+                    {offer && (
+                      <span
+                        style={{
+                          fontSize: '1.125rem',
+                          color: 'var(--text-muted)',
+                          textDecoration: 'line-through',
+                          fontWeight: 600,
+                        }}
+                      >
+                        ${offer.compareAtPrice.toFixed(2)}
+                      </span>
+                    )}
                   </div>
                   {offer && (
-                    <span
-                      style={{
-                        fontSize: '1.125rem',
-                        color: 'var(--text-muted)',
-                        textDecoration: 'line-through',
-                        fontWeight: 600,
-                      }}
-                    >
-                      ${offer.compareAtPrice.toFixed(2)}
-                    </span>
+                    <div style={{ fontSize: '0.8125rem', color: 'var(--accent-olive)', fontWeight: 600, marginTop: '0.25rem' }}>
+                      You save ${(offer.compareAtPrice - offer.price).toFixed(2)}
+                    </div>
                   )}
                 </div>
-                {offer && (
-                  <div style={{ fontSize: '0.8125rem', color: 'var(--accent-olive)', fontWeight: 600, marginTop: '0.25rem' }}>
-                    You save ${(offer.compareAtPrice - offer.price).toFixed(2)}
-                  </div>
-                )}
-              </div>
 
-              <div style={{ textAlign: 'right' }}>
-                {offer ? (
-                  <span
-                    style={{
-                      display: 'inline-block',
-                      backgroundColor: 'var(--primary)',
-                      color: '#fff',
-                      fontSize: '0.75rem',
-                      fontWeight: 800,
-                      padding: '0.35rem 0.65rem',
-                      borderRadius: 'var(--radius-pill)',
-                      letterSpacing: '0.03em',
-                    }}
-                  >
-                    {offer.percentOff}% OFF
-                  </span>
-                ) : book.comingSoon ? (
-                  <span className="badge badge-neutral">Coming Soon</span>
-                ) : (
-                  <span className="badge badge-success">Instant Delivery</span>
-                )}
-                <div style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
-                  {book.comingSoon ? 'Not available for purchase yet' : `PDF • ${book.fileSize}`}
+                <div style={{ textAlign: 'right' }}>
+                  {offer ? (
+                    <span
+                      style={{
+                        display: 'inline-block',
+                        backgroundColor: 'var(--primary)',
+                        color: '#fff',
+                        fontSize: '0.75rem',
+                        fontWeight: 800,
+                        padding: '0.35rem 0.65rem',
+                        borderRadius: 'var(--radius-pill)',
+                        letterSpacing: '0.03em',
+                      }}
+                    >
+                      {offer.percentOff}% OFF
+                    </span>
+                  ) : (
+                    <span className="badge badge-success">Instant Delivery</span>
+                  )}
+                  <div style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
+                    PDF • {book.fileSize}
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
+
+            {book.comingSoon && (
+              <div
+                style={{
+                  backgroundColor: 'var(--bg-subtle)',
+                  border: '1px solid var(--border-light)',
+                  borderRadius: 'var(--radius-lg)',
+                  padding: '1rem 1.25rem',
+                  marginBottom: '2rem',
+                }}
+              >
+                <div style={{ fontSize: '0.9375rem', fontWeight: 700, color: 'var(--text-primary)' }}>
+                  Coming Soon
+                </div>
+                <div style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+                  Pricing and download details will be available at launch.
+                </div>
+              </div>
+            )}
 
             {/* Description */}
             <div style={{ marginBottom: '2rem' }}>
@@ -328,34 +351,36 @@ export default function BookDetailPage({
             </div>
 
             {/* Metadata Table */}
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
-                gap: '1rem',
-                padding: '1.25rem',
-                backgroundColor: 'var(--bg-subtle)',
-                borderRadius: 'var(--radius-md)',
-                marginBottom: '2rem',
-              }}
-            >
-              <div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Page Count</div>
-                <div style={{ fontSize: '0.9375rem', fontWeight: 700 }}>{book.pageCount} Pages</div>
+            {!book.comingSoon && (
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
+                  gap: '1rem',
+                  padding: '1.25rem',
+                  backgroundColor: 'var(--bg-subtle)',
+                  borderRadius: 'var(--radius-md)',
+                  marginBottom: '2rem',
+                }}
+              >
+                <div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Page Count</div>
+                  <div style={{ fontSize: '0.9375rem', fontWeight: 700 }}>{book.pageCount} Pages</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Format</div>
+                  <div style={{ fontSize: '0.9375rem', fontWeight: 700 }}>Digital PDF</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>File Size</div>
+                  <div style={{ fontSize: '0.9375rem', fontWeight: 700 }}>{book.fileSize}</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Language</div>
+                  <div style={{ fontSize: '0.9375rem', fontWeight: 700 }}>English</div>
+                </div>
               </div>
-              <div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Format</div>
-                <div style={{ fontSize: '0.9375rem', fontWeight: 700 }}>Digital PDF</div>
-              </div>
-              <div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>File Size</div>
-                <div style={{ fontSize: '0.9375rem', fontWeight: 700 }}>{book.fileSize}</div>
-              </div>
-              <div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Language</div>
-                <div style={{ fontSize: '0.9375rem', fontWeight: 700 }}>English</div>
-              </div>
-            </div>
+            )}
 
             {/* Tags */}
             {book.tags && book.tags.length > 0 && (
@@ -374,40 +399,42 @@ export default function BookDetailPage({
             )}
 
             {/* What you get */}
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-                gap: '0.75rem',
-                marginBottom: '1.75rem',
-              }}
-              className="book-trust-row"
-            >
-              {[
-                { icon: <Download size={16} color="var(--primary)" />, text: 'Instant PDF' },
-                { icon: <Smartphone size={16} color="var(--accent-olive)" />, text: 'Phone & tablet ready' },
-                { icon: <Printer size={16} color="var(--secondary)" />, text: 'Print-friendly pages' },
-              ].map((item) => (
-                <div
-                  key={item.text}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    padding: '0.65rem 0.75rem',
-                    borderRadius: 'var(--radius-md)',
-                    background: 'var(--bg-subtle)',
-                    border: '1px solid #2E2825',
-                    fontSize: '0.8125rem',
-                    fontWeight: 600,
-                    color: 'var(--text-secondary)',
-                  }}
-                >
-                  {item.icon}
-                  {item.text}
-                </div>
-              ))}
-            </div>
+            {!book.comingSoon && (
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+                  gap: '0.75rem',
+                  marginBottom: '1.75rem',
+                }}
+                className="book-trust-row"
+              >
+                {[
+                  { icon: <Download size={16} color="var(--primary)" />, text: 'Instant PDF' },
+                  { icon: <Smartphone size={16} color="var(--accent-olive)" />, text: 'Phone & tablet ready' },
+                  { icon: <Printer size={16} color="var(--secondary)" />, text: 'Print-friendly pages' },
+                ].map((item) => (
+                  <div
+                    key={item.text}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      padding: '0.65rem 0.75rem',
+                      borderRadius: 'var(--radius-md)',
+                      background: 'var(--bg-subtle)',
+                      border: '1px solid #2E2825',
+                      fontSize: '0.8125rem',
+                      fontWeight: 600,
+                      color: 'var(--text-secondary)',
+                    }}
+                  >
+                    {item.icon}
+                    {item.text}
+                  </div>
+                ))}
+              </div>
+            )}
 
             {/* Purchase Action Bar */}
             {book.comingSoon ? (

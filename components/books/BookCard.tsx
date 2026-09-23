@@ -67,7 +67,7 @@ export const BookCard: React.FC<BookCardProps> = ({ book }) => {
             transition: 'transform 0.4s ease',
           }}
         />
-        {offer && (
+        {offer && !isComingSoon && (
           <span
             style={{
               position: 'absolute',
@@ -138,8 +138,12 @@ export const BookCard: React.FC<BookCardProps> = ({ book }) => {
           <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>
             {book.category}
           </span>
-          <span style={{ color: 'var(--border-dark)' }}>·</span>
-          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>PDF</span>
+          {!isComingSoon && (
+            <>
+              <span style={{ color: 'var(--border-dark)' }}>·</span>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>PDF</span>
+            </>
+          )}
           <span
             style={{
               marginLeft: 'auto',
@@ -195,49 +199,60 @@ export const BookCard: React.FC<BookCardProps> = ({ book }) => {
         </p>
 
         <div style={{ marginTop: 'auto' }}>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'baseline',
-              justifyContent: 'space-between',
-              marginBottom: '0.75rem',
-              gap: '0.5rem',
-            }}
-          >
-            <div>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', flexWrap: 'wrap' }}>
-                <span
-                  style={{
-                    fontSize: '1.375rem',
-                    fontWeight: 800,
-                    color: 'var(--primary-dark)',
-                    fontFamily: 'var(--font-heading)',
-                  }}
-                >
-                  ${book.price.toFixed(2)}
-                </span>
-                {offer && (
+          {!isComingSoon ? (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'baseline',
+                justifyContent: 'space-between',
+                marginBottom: '0.75rem',
+                gap: '0.5rem',
+              }}
+            >
+              <div>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', flexWrap: 'wrap' }}>
                   <span
                     style={{
-                      fontSize: '0.875rem',
-                      color: 'var(--text-muted)',
-                      textDecoration: 'line-through',
-                      fontWeight: 600,
+                      fontSize: '1.375rem',
+                      fontWeight: 800,
+                      color: 'var(--primary-dark)',
+                      fontFamily: 'var(--font-heading)',
                     }}
                   >
-                    ${offer.compareAtPrice.toFixed(2)}
+                    ${book.price.toFixed(2)}
                   </span>
-                )}
-              </div>
-              <span style={{ display: 'block', fontSize: '0.6875rem', color: 'var(--text-muted)' }}>
-                {isComingSoon
-                  ? 'Preview only · Not for sale yet'
-                  : offer
+                  {offer && (
+                    <span
+                      style={{
+                        fontSize: '0.875rem',
+                        color: 'var(--text-muted)',
+                        textDecoration: 'line-through',
+                        fontWeight: 600,
+                      }}
+                    >
+                      ${offer.compareAtPrice.toFixed(2)}
+                    </span>
+                  )}
+                </div>
+                <span style={{ display: 'block', fontSize: '0.6875rem', color: 'var(--text-muted)' }}>
+                  {offer
                     ? `Offer · Save $${(offer.compareAtPrice - offer.price).toFixed(2)}`
                     : `Instant download · ${book.pageCount} pages`}
-              </span>
+                </span>
+              </div>
             </div>
-          </div>
+          ) : (
+            <p
+              style={{
+                margin: '0 0 0.75rem',
+                fontSize: '0.8125rem',
+                fontWeight: 600,
+                color: 'var(--text-muted)',
+              }}
+            >
+              Coming soon · Not for sale yet
+            </p>
+          )}
 
           <div
             className="book-card-actions"
