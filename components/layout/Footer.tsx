@@ -155,7 +155,16 @@ export const Footer: React.FC = () => {
               <li><Link href="/library" style={{ color: '#A8A29E' }}>My Download Library</Link></li>
               <li><Link href="/cart" style={{ color: '#A8A29E' }}>Shopping Cart</Link></li>
               <li><Link href="/login" style={{ color: '#A8A29E' }}>Customer Login</Link></li>
-              <li><Link href="/admin/login" style={{ color: '#A8A29E' }}>Admin Portal</Link></li>
+            </ul>
+          </div>
+
+          <div>
+            <h5 style={{ color: '#FFFFFF', marginBottom: '1rem', fontSize: '0.9375rem' }}>Company &amp; Legal</h5>
+            <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.625rem', fontSize: '0.875rem' }}>
+              <li><Link href="/about" style={{ color: '#A8A29E' }}>About Us</Link></li>
+              <li><Link href="/contact" style={{ color: '#A8A29E' }}>Contact</Link></li>
+              <li><Link href="/privacy" style={{ color: '#A8A29E' }}>Privacy Policy</Link></li>
+              <li><Link href="/terms" style={{ color: '#A8A29E' }}>Terms of Service</Link></li>
             </ul>
           </div>
         </div>
@@ -181,9 +190,11 @@ export const Footer: React.FC = () => {
           </div>
 
           <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', fontSize: '0.75rem' }}>
-            <Link href="/admin/login" style={{ color: '#78716C' }}>Administrator</Link>
+            <Link href="/privacy" style={{ color: '#78716C' }}>Privacy</Link>
             <span>•</span>
-            <span>PDF Format E-Books</span>
+            <Link href="/terms" style={{ color: '#78716C' }}>Terms</Link>
+            <span>•</span>
+            <Link href="/contact" style={{ color: '#78716C' }}>Contact</Link>
             <span>•</span>
             <span>Instant Digital Delivery</span>
           </div>

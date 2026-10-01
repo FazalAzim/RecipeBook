@@ -511,6 +511,39 @@ export default function HomePage() {
         </div>
       </section>
 
+      <section className="page-section" style={{ padding: '0 0 3rem' }} aria-label="About our store">
+        <div className="container">
+          <div className="glass-panel" style={{ padding: 'clamp(1.5rem, 3vw, 2.25rem)' }}>
+            <h2 style={{ fontSize: '1.5rem', marginBottom: '0.75rem', color: '#F3EDE4' }}>
+              A real digital cookbook store for home cooks
+            </h2>
+            <p style={{ color: 'rgba(243, 237, 228, 0.78)', fontSize: '1rem', lineHeight: 1.7, marginBottom: '1rem', maxWidth: '46rem' }}>
+              RecipeBooks Market sells high-quality PDF cookbooks you can download instantly and keep in
+              your personal library. Browse cuisines, buy a single title, or unlock every published book
+              with Lifetime All-Access. We focus on clear recipes, secure checkout, and lifetime re-download
+              access — not subscriptions that expire every month.
+            </p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
+              <Link href="/about">
+                <Button variant="secondary" size="sm">
+                  About us
+                </Button>
+              </Link>
+              <Link href="/contact">
+                <Button variant="secondary" size="sm">
+                  Contact support
+                </Button>
+              </Link>
+              <Link href="/privacy">
+                <Button variant="secondary" size="sm">
+                  Privacy policy
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section
         className="page-section"
         style={{ padding: '1.5rem 0 3rem' }}
